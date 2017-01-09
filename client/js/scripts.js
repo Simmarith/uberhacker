@@ -17,7 +17,7 @@ function submitInput(){
   alert(value);
   event.preventDefault();
 }
-$( "html" ).keydown(function( event ) {
+/*$( "html" ).keydown(function( event ) {
   if (Math.floor(Math.random() * 3) == 0) {
     bullshitWindow();
   }
@@ -58,7 +58,7 @@ $( "html" ).keydown(function( event ) {
   }
   var msg = "Handler for .keypress() called " + event.which;
   console.log( msg);
-});
+});*/
 var windowlist = "";
 function createWindow(windowTitle="",windowType="bullshit",windowSize="small",windowCodebase="",windowPos="random") {
   windowId=Math.floor(Math.random()*16777215).toString(16);
@@ -139,5 +139,5 @@ $.ajax({
   });
 }
 //window.setInterval("less.watch();",500);
-window.setInterval("updateScoreboard();",500);
-window.setInterval("bullshitWindow();",5000);
+//window.setInterval("updateScoreboard();",500);
+//window.setInterval("bullshitWindow();",5000);
