@@ -16,6 +16,9 @@ var NonsenseWindow = {
         Object.defineProperty(nonsenseWindow, 'scenario', {
             get: function() { return this._scenario; },
             set: function(value) {
+                if (value == 'random') {
+                    value = Math.round(Math.random() * (NonsenseWindow.scenarios.length - 1));
+                }
                 this._scenario = value;
                 this.hackWindow.title = NonsenseWindow.scenarios[value].title;
                 this.content = NonsenseWindow.scenarios[value].content;
@@ -40,8 +43,7 @@ var NonsenseWindow = {
             }
         });
 
-        //TODO: decide scenario randomly
-        nonsenseWindow.scenario = 1;
+        nonsenseWindow.scenario = 'random';
         nonsenseWindow.lastLine = 0;
         return nonsenseWindow;
     },

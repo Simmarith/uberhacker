@@ -33,6 +33,29 @@ var HackWindow = {
 
             }
         });
+
+        Object.defineProperty(hackWindow, 'x', {
+            get: function() { return this._x; },
+            set: function(value) {
+                if (value == 'random') {
+                    var maxX = window.innerWidth - this.hackWindowNode.width();
+                    value = Math.random() * maxX;
+                }
+                this._x = value;
+                this.hackWindowNode.css('left', value);
+            }
+        });
+        Object.defineProperty(hackWindow, 'y', {
+            get: function() { return this._y; },
+            set: function(value) {
+                if (value == 'random') {
+                    var maxY = window.innerHeight - this.hackWindowNode.height();
+                    value = Math.random() * maxY;
+                }
+                this._y = value;
+                this.hackWindowNode.css('top', value);
+            }
+        });
         //defaults
         hackWindow.size = 'small';
 
