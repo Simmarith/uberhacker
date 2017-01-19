@@ -5,6 +5,13 @@ var HackWindow = {
             hackWindowNode: $('<div class="window"><div class="content"></div><div class="windowtitle"></div></div>'),
             //Methods
             appendTo: function(target) { this.hackWindowNode.appendTo(target); },
+            focusMe: function() {
+                $(".window").removeClass("focus");
+                $(".window").addClass("unfocus");
+                this.hackWindowNode.removeClass("unfocus");
+                this.hackWindowNode.addClass("focus");
+                $(".focus .content .input").focus();
+            }
         };
 
         Object.defineProperty(hackWindow, 'title', {
@@ -58,7 +65,8 @@ var HackWindow = {
         });
         //defaults
         hackWindow.size = 'small';
-
+        $(".window").draggable();
+        hackWindow.hackWindowNode.on('click', () => { hackWindow.focusMe(); });
         return hackWindow;
     }
 };
