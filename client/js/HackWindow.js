@@ -48,6 +48,9 @@ var HackWindow = {
                     var maxX = window.innerWidth - this.hackWindowNode.width();
                     value = Math.random() * maxX;
                 }
+                if (value == 'center') {
+                    value = '';
+                }
                 this._x = value;
                 this.hackWindowNode.css('left', value);
             }
@@ -58,6 +61,9 @@ var HackWindow = {
                 if (value == 'random') {
                     var maxY = window.innerHeight - this.hackWindowNode.height();
                     value = Math.random() * maxY;
+                }
+                if (value == 'center') {
+                    value = '';
                 }
                 this._y = value;
                 this.hackWindowNode.css('top', value);
