@@ -16,3 +16,6 @@
   }
 
 window.setInterval(function () { less.watch(); },500);
+var socket = io();
+socket.on('game', function(game) { console.log(game); });
+socket.on('killGame', function(game) { console.log(game + ' - should now be killed'); });
