@@ -1,48 +1,51 @@
 <!doctype html>
 
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <title>Uberhacker</title>
-  <meta name="author" content="Jan">
+    <title>Uberhacker</title>
+    <meta name="author" content="Jan">
 
-  <link rel="stylesheet" href="css/font-awesome.min.css">
-  <link rel="stylesheet/less" type="text/css" href="less/base.less">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet/less" type="text/css" href="less/base.less">
 
-  <script src="js/less.js" type="text/javascript"></script>
+    <script src="js/less.js" type="text/javascript"></script>
 
-  <script src="js/jquery-1.10.2.js"></script>
-  <script src="js/jquery-ui.js"></script>
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 
-  <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,900' rel='stylesheet' type='text/css'>
 </head>
 
 <body>
-  <ul id="iconbar">
-    <li class="fa fa-bomb active"><span>1</span></li>
-    <li class="fa fa-user-secret">
-      <span>2</span>
-    </li>
-    <li class="fa fa-building-o">
-      <span>3</span>
-    </li>
-    <li class="fa fa-globe">
-      <span>4</span>
-    </li>
-    <li class="fa fa-unlock-alt"></li>
-    <li class="fa fa-wifi"></li>
-    <li class="fa fa-warning"></li>
-    <li class="fa fa-shield"></li>
+    <ul id="iconbar">
+        <li class="fa fa-bomb active"><span>1</span></li>
+        <li class="fa fa-user-secret">
+            <span>2</span>
+        </li>
+        <li class="fa fa-building-o">
+            <span>3</span>
+        </li>
+        <li class="fa fa-globe">
+            <span>4</span>
+        </li>
+        <li class="fa fa-unlock-alt"></li>
+        <li class="fa fa-wifi"></li>
+        <li class="fa fa-warning"></li>
+        <li class="fa fa-shield"></li>
 
-  </ul>
-  <div id="windowlist">
-  </div>
-  <div id="scoreboard">
-  </div>
+    </ul>
+    <div id="windowlist">
+    </div>
+    <div id="scoreboard">
+    </div>
 
-  <script src="js/scripts.js"></script>
-  <script src="js/HackWindow.js"></script>
-  <script src="js/NonsenseWindow.js"></script>
+    <script src="js/scripts.js"></script>
+    <script src="js/HackWindow.js"></script>
+    <script src="js/NonsenseWindow.js"></script>
+    <script src="js/GameWindow.js"></script>
 </body>
+
 </html>
