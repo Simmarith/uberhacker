@@ -8,14 +8,9 @@
     <title>Uberhacker</title>
     <meta name="author" content="Jan">
 
-    <link rel="stylesheet" href="css/font-awesome.min.css">
-    <link rel="stylesheet/less" type="text/css" href="less/base.less">
-
-    <script src="js/less.js" type="text/javascript"></script>
-
-    <script src="js/jquery-1.10.2.js"></script>
-    <script src="js/jquery-ui.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="nameMe/css/font-awesome.min.css">
+    <link rel="stylesheet/less" type="text/css" href="nameMe/less/base.less">
+    <script src="nameMe/js/less.js" type="text/javascript"></script>
 
 </head>
 
@@ -38,15 +33,18 @@
 
     </ul>
     <div id="windowlist">
+        <div class="window">
+            <input class="content"></input>
+            <div class="windowtitle">nameMe</div>
+        </div>
     </div>
     <div id="scoreboard">
     </div>
 
-    <script src="js/HackWindow.js"></script>
-    <script src="js/NonsenseWindow.js"></script>
-    <script src="js/GameWindow.js"></script>
-    <script src="js/ScoreBoard.js"></script>
-    <script src="js/scripts.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        window.setInterval(function() { less.watch(); }, 500);
+    </script>
+
 </body>
 
 </html>

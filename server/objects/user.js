@@ -1,14 +1,23 @@
 module.exports = {
-    newUser: function(socket) {
+    newUser: function(socket, session) {
         var user = {
-            id: 0,
             socket: socket,
+            username: '',
+            session: session
         }
         
-        user.id = this.userCount;
-        this.userCount++;
+        Object.defineProperty(user, 'score', {
+            get: function() {
+                return this._score;
+            },
+            set: function(value) {
+                this._score = value;
+                this.session.sendScoreBoard();
+            }
+        });
+        
+        user.score = 0;
         
         return user;
     },
-    userCount: 0
 }

@@ -3,7 +3,7 @@ var games = require('./game.js');
 module.exports = {
     newSession: function(socket) {
         var session = {
-            users: [],
+            users: {},
             topScore: 0,
             socket: socket,
             start: function() {},
@@ -11,11 +11,11 @@ module.exports = {
             score: function(user, value) {},
             sendGame: function(gameData) {
                 this.socket.emit('game', gameData);
-                for (var i = this.users.length - 1; i >= 0; i--) {
-                    let gameResolve = (gameResolve) => {
-                        //TODO: Assign point to player and kill listeners
+                for (var user in this.users) {
+                    let gameResolve = (socketId, gameResolve) => {
                         if (gameResolve == this.game.gameResolve) {
-                            console.log('he was right!');
+                            console.log(socketId + '(' + this.users[socketId].username + ') was right!');
+                            this.users[socketId].score++;
                             this.killGames();
                             this.game = "fastType";
                         }
@@ -23,17 +23,31 @@ module.exports = {
                             console.log('he was wrong! He sent: ' + gameResolve);
                         }
                     };
-                    
-                    this.users[i].socket.on('gameResolve', gameResolve);
-                    
-                    this.users[i].gameResolve = gameResolve;
+
+                    this.users[user].socket.on('gameResolve', gameResolve);
+
+                    this.users[user].gameResolve = gameResolve;
+                }
+            },
+            sendScoreBoard: function() {
+                let scoreBoard = [];
+                for (var user in this.users) {
+                    let scoreBoardEntry = {};
+                    scoreBoardEntry.username = this.users[user].username;
+                    scoreBoardEntry.score = this.users[user].score;
+                    scoreBoard.push(scoreBoardEntry);
+                }
+                for (var user in this.users) {
+                    this.users[user].socket.emit('scoreBoard', scoreBoard);
                 }
             },
             killGames: function() {
-                for (var i = this.users.length; i--;) {
-                    this.users[i].socket.removeListener('gameResolve', this.users[i].gameResolve);
+                if (this.game) {
+                    for (var user in this.users) {
+                        this.users[user].socket.removeListener('gameResolve', this.users[user].gameResolve);
+                    }
+                    this.socket.emit('killGame', this.game.title);
                 }
-                this.socket.emit('killGame', this.game.title);
             }
         }
 
