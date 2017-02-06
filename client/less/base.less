@@ -43,6 +43,13 @@ body {
   float: right;
   box-shadow: 0px 0px 100px fadeout(@back, 20%);
   background: fadeout(@windowback,10%);
+  
+  input {
+      background: none;
+      border: none;
+      display: inline-block;
+      width: 100%;
+  }
 
 }
 .windowtitle {
@@ -76,6 +83,17 @@ body {
 }
 .unfocus{
   z-index: 900;
+}
+.ultraSmall {
+  top: calc(~'50% - 20px');
+  left: calc(~'50% - 50px');
+
+  width: 100px;
+  height: 40px;
+  font-size: 80%;
+  .windowtitle {
+    padding: 2px;
+  }
 }
 .small {
   top: calc(~'50% - 120px');
