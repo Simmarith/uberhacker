@@ -49,6 +49,22 @@ var GameWindow = {
                 this.content.find('.gameInput').val('');
             }
         },
-        getNet: { title: 'getNet' }
+        getNet: {
+            title: 'getNet',
+            displayTitle: 'MITM v14.0.2',
+            content: $('<div class="game"><div class="info"></div><input class="gameInput"></input></div>'),
+            explainingText: 'We need to get into this network! Give us the Network address the following IP is in:<br />',
+            play: function(ip) {
+                this.content.find('.info').html(this.explainingText + ip);
+                this.content.find('.gameInput').on('change', function(e) {
+                    socket.emit('gameResolve', socket.id, e.target.value);
+                    console.log(e.target.value);
+                });
+                this.content.find('.gameInput').focus();
+            },
+            kill: function() {
+                this.content.find('.gameInput').val('');
+            }
+        }
     }
 }

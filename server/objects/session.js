@@ -17,10 +17,14 @@ module.exports = {
                             console.log(socketId + '(' + this.users[socketId].username + ') was right!');
                             this.users[socketId].score++;
                             this.killGames();
-                            this.game = "fastType";
+                            if (Math.round(Math.random())) {
+                                this.game = "getNet";
+                            } else {
+                                this.game = "fastType";
+                            }
                         }
                         else {
-                            console.log('he was wrong! He sent: ' + gameResolve);
+                            console.log('he was wrong! He sent: "' + gameResolve + '" (the right answer is "' + this.game.gameResolve + '")');
                         }
                     };
 
