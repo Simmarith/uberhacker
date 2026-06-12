@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { socket } from '../socket';
 import Window from './Window.jsx';
+import Calculator from './Calculator.jsx';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -15,6 +16,7 @@ function Clock() {
 // that doubles as the live scoreboard.
 export default function Desktop({ room, you, isHost, windows, onFocus }) {
   const target = room.config?.targetScore;
+  const [calcOpen, setCalcOpen] = useState(false);
   return (
     <div className="desktop">
       <div className="desktop-watermark">uberhacker_OS</div>
@@ -26,11 +28,19 @@ export default function Desktop({ room, you, isHost, windows, onFocus }) {
         {windows.length === 0 ? (
           <div className="desktop-idle">// loading challenges…</div>
         ) : null}
+        {calcOpen ? <Calculator onClose={() => setCalcOpen(false)} /> : null}
       </div>
 
       <footer className="taskbar">
         <span className="tb-brand glitch" data-text="uberhacker">uberhacker</span>
         <span className="tb-room">[{room.code}]</span>
+        <button
+          className={`tb-app ${calcOpen ? 'on' : ''}`}
+          onClick={() => setCalcOpen((o) => !o)}
+          title="calculator"
+        >
+          calc
+        </button>
 
         <div className="tb-scores">
           {room.players.map((p) => (
