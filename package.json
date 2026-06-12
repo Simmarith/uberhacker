@@ -1,0 +1,14 @@
+{
+  "name": "uberhacker",
+  "version": "1.0.0",
+  "description": "Multiplayer fake-hacking party game. Race your friends through computer-y challenges.",
+  "license": "MIT",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "start": "npm run build && cd server && npm start",
+    "server": "cd server && npm start",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev"
+  }
+}
