@@ -42,9 +42,9 @@ const WORD_POOL = [
 const DIFFICULTIES = ['easy', 'normal', 'hard'];
 
 const DIFFICULTY_CONFIG = {
-  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15 },
-  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255 },
-  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095 },
+  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 2 },
+  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 3 },
+  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 5 },
 };
 
 function cfg(difficulty) {
@@ -127,6 +127,20 @@ const generators = {
     };
   },
 
+  // Knock a sequence of ports on a safe-style rotary dial. Harder = more
+  // ports in the sequence. Ports are kept in 1..9999.
+  portKnock(difficulty) {
+    const count = cfg(difficulty).knockPorts;
+    const ports = Array.from({ length: count }, () => 1 + rand(9998));
+    return {
+      type: 'portKnock',
+      prompt: `Knock these ports in order:  ${ports.join(' → ')}`,
+      answer: ports.join('-'),
+      hint: 'Dial each port on the safe, then knock it in sequence.',
+      data: { ports }, // public: the dial UI needs the target sequence
+    };
+  },
+
   // Bitwise XOR of two numbers (answer in decimal). Harder = bigger operands.
   xor(difficulty) {
     const max = cfg(difficulty).xorMax;
@@ -164,6 +178,7 @@ function makeChallenge(type, difficulty = 'normal') {
     type: c.type,
     prompt: c.prompt,
     hint: c.hint,
+    ...(c.data || {}), // public extras a custom UI needs (survives Room.safe)
     _answer: c.answer, // server-only, never sent to clients
   };
 }

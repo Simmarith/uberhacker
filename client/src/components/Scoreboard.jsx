@@ -8,6 +8,7 @@ const TYPE_LABELS = {
   decToHex: 'dec → hex',
   binToDec: 'bin → dec',
   xor: 'bitwise xor',
+  portKnock: 'port knock',
 };
 
 export function typeLabel(t) {

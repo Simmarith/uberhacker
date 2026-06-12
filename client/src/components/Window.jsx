@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { socket } from '../socket';
 import { typeLabel } from './Scoreboard.jsx';
+import PortKnock from './PortKnock.jsx';
 
 // A single draggable challenge window in the fake desktop.
 export default function Window({ win, onFocus }) {
@@ -34,16 +35,22 @@ export default function Window({ win, onFocus }) {
     inputRef.current.focus();
   }, [solved]);
 
-  const submit = (e) => {
-    e.preventDefault();
-    if (solved || !value.trim()) return;
-    socket.emit('answer', { challengeId: id, value }, (res) => {
+  // Send an answer; on a wrong result, shake the window and run onWrong so
+  // the caller can reset its own input state.
+  const sendAnswer = (val, onWrong) => {
+    if (solved || !String(val).trim()) return;
+    socket.emit('answer', { challengeId: id, value: val }, (res) => {
       if (res && res.result === 'wrong') {
         setShake(true);
         setTimeout(() => setShake(false), 400);
-        setValue('');
+        onWrong && onWrong();
       }
     });
+  };
+
+  const submit = (e) => {
+    e.preventDefault();
+    sendAnswer(value, () => setValue(''));
   };
 
   // ---- dragging via the title bar ----
@@ -88,15 +95,19 @@ export default function Window({ win, onFocus }) {
       ) : (
         <div className="windowbody">
           <p className="prompt">{challenge.prompt}</p>
-          <form onSubmit={submit}>
-            <span className="caret">&gt;</span>
-            <input
-              ref={inputRef}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder="answer + enter"
-            />
-          </form>
+          {challenge.type === 'portKnock' ? (
+            <PortKnock challenge={challenge} onAnswer={sendAnswer} />
+          ) : (
+            <form onSubmit={submit}>
+              <span className="caret">&gt;</span>
+              <input
+                ref={inputRef}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="answer + enter"
+              />
+            </form>
+          )}
           <p className="hintline">// {challenge.hint}</p>
         </div>
       )}
