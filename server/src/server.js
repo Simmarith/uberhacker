@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { RoomManager } = require('./rooms');
-const { ALL_TYPES } = require('./challenges');
+const { ALL_TYPES, DIFFICULTIES } = require('./challenges');
 
 const PORT = process.env.PORT || 3000;
 
@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
     socket.join(code);
     roomCode = code;
 
-    if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES });
+    if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES, difficulties: DIFFICULTIES });
     r.broadcastState();
 
     // If a game is already running, drop the new player straight into it

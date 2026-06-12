@@ -1,4 +1,4 @@
-const { makeChallenge, checkAnswer, ALL_TYPES } = require('./challenges');
+const { makeChallenge, checkAnswer, ALL_TYPES, DIFFICULTIES } = require('./challenges');
 
 // Delay before a solved window is replaced by a fresh challenge, so players
 // can see who won before a new window pops up in its place.
@@ -11,7 +11,7 @@ class Room {
     this.players = new Map(); // socketId -> { id, name, score }
     this.hostId = null;
     this.state = 'lobby'; // lobby | playing | over
-    this.config = { targetScore: 5, concurrent: 3, types: ALL_TYPES };
+    this.config = { targetScore: 5, concurrent: 3, types: ALL_TYPES, difficulty: 'normal' };
     this.active = new Map(); // challengeId -> challenge (with _answer)
     this.timers = new Set(); // pending refill timeouts
     this.winner = null; // overall game winner
@@ -78,6 +78,9 @@ class Room {
       targetScore: clampInt(config.targetScore, 1, 50, this.config.targetScore),
       concurrent: clampInt(config.concurrent, 1, 6, this.config.concurrent),
       types: validTypes(config.types) || this.config.types,
+      difficulty: DIFFICULTIES.includes(config.difficulty)
+        ? config.difficulty
+        : this.config.difficulty,
     };
     this.clearTimers();
     this.active.clear();
@@ -92,7 +95,7 @@ class Room {
   spawnChallenge() {
     if (this.state !== 'playing') return;
     const type = this.config.types[Math.floor(Math.random() * this.config.types.length)];
-    const ch = makeChallenge(type);
+    const ch = makeChallenge(type, this.config.difficulty);
     this.active.set(ch.id, ch);
     this.io.to(this.code).emit('challengeOpen', { ...Room.safe(ch), startedAt: Date.now() });
   }

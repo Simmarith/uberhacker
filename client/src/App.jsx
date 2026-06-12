@@ -12,6 +12,7 @@ export default function App() {
   const [joined, setJoined] = useState(false);
   const [you, setYou] = useState(null);
   const [types, setTypes] = useState([]);
+  const [difficulties, setDifficulties] = useState(['easy', 'normal', 'hard']);
   const [room, setRoom] = useState(null);
   const [windows, setWindows] = useState([]); // [{ id, challenge, pos, z, solved }]
 
@@ -79,6 +80,7 @@ export default function App() {
         setJoined(true);
         setYou(res.you);
         if (res.types) setTypes(res.types);
+        if (res.difficulties) setDifficulties(res.difficulties);
       } else {
         alert((res && res.error) || 'Could not join.');
       }
@@ -104,5 +106,5 @@ export default function App() {
   }
 
   // lobby or over
-  return <Lobby room={room} you={you} isHost={isHost} types={types} />;
+  return <Lobby room={room} you={you} isHost={isHost} types={types} difficulties={difficulties} />;
 }

@@ -37,22 +37,38 @@ const WORD_POOL = [
   'buffer', 'inject', 'spoof', 'proxy', 'handshake', 'bytecode', 'token',
 ];
 
+// Per-difficulty knobs for each generator. `easy` is the gentlest, `hard`
+// the toughest; `normal` sits in the middle and matches the old behaviour.
+const DIFFICULTIES = ['easy', 'normal', 'hard'];
+
+const DIFFICULTY_CONFIG = {
+  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15 },
+  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255 },
+  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095 },
+};
+
+function cfg(difficulty) {
+  return DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.normal;
+}
+
 const generators = {
-  // Type the word as fast as you can.
-  fastType() {
-    const word = pick(WORD_POOL);
+  // Type the word(s) as fast as you can. Harder = more words.
+  fastType(difficulty) {
+    const count = cfg(difficulty).words;
+    const words = Array.from({ length: count }, () => pick(WORD_POOL));
+    const phrase = words.join(' ');
     return {
       type: 'fastType',
-      prompt: `Type this word as fast as you can:  ${word}`,
-      answer: word,
-      hint: 'Just type the word exactly.',
+      prompt: `Type this as fast as you can:  ${phrase}`,
+      answer: phrase,
+      hint: 'Type it exactly, words separated by spaces.',
     };
   },
 
-  // Given IP / CIDR, find the network address.
-  getNet() {
+  // Given IP / CIDR, find the network address. Harder = non-octet CIDRs.
+  getNet(difficulty) {
     const ip = randIp();
-    const cidr = pick([8, 16, 24]);
+    const cidr = pick(cfg(difficulty).cidrs);
     const mask = maskOctets(cidr);
     const network = ip.map((o, i) => o & mask[i]);
     return {
@@ -63,10 +79,10 @@ const generators = {
     };
   },
 
-  // Broadcast address for an IP / CIDR.
-  broadcast() {
+  // Broadcast address for an IP / CIDR. Harder = non-octet CIDRs.
+  broadcast(difficulty) {
     const ip = randIp();
-    const cidr = pick([8, 16, 24]);
+    const cidr = pick(cfg(difficulty).cidrs);
     const mask = maskOctets(cidr);
     const bcast = ip.map((o, i) => (o & mask[i]) | (~mask[i] & 255));
     return {
@@ -77,9 +93,9 @@ const generators = {
     };
   },
 
-  // Hex -> decimal (single hex digit, 0..15).
-  hexToDec() {
-    const n = rand(15);
+  // Hex -> decimal. Harder = bigger numbers.
+  hexToDec(difficulty) {
+    const n = rand(cfg(difficulty).maxNum);
     return {
       type: 'hexToDec',
       prompt: `Convert hex  0x${n.toString(16).toUpperCase()}  to decimal:`,
@@ -88,9 +104,9 @@ const generators = {
     };
   },
 
-  // Decimal -> hex (single hex digit, 0..15).
-  decToHex() {
-    const n = rand(15);
+  // Decimal -> hex. Harder = bigger numbers.
+  decToHex(difficulty) {
+    const n = rand(cfg(difficulty).maxNum);
     return {
       type: 'decToHex',
       prompt: `Convert decimal  ${n}  to hex (no 0x prefix):`,
@@ -99,21 +115,23 @@ const generators = {
     };
   },
 
-  // Binary -> decimal (4-bit nibble, 0..15).
-  binToDec() {
-    const n = rand(15);
+  // Binary -> decimal. Harder = wider binary.
+  binToDec(difficulty) {
+    const bits = cfg(difficulty).bits;
+    const n = rand(Math.pow(2, bits) - 1);
     return {
       type: 'binToDec',
-      prompt: `Convert binary  ${n.toString(2).padStart(4, '0')}  to decimal:`,
+      prompt: `Convert binary  ${n.toString(2).padStart(bits, '0')}  to decimal:`,
       answer: String(n),
-      hint: 'Bits are 8, 4, 2, 1.',
+      hint: 'Each bit doubles: 1, 2, 4, 8 …',
     };
   },
 
-  // Bitwise XOR of two nibbles (answer in decimal).
-  xor() {
-    const a = rand(15);
-    const b = rand(15);
+  // Bitwise XOR of two numbers (answer in decimal). Harder = bigger operands.
+  xor(difficulty) {
+    const max = cfg(difficulty).xorMax;
+    const a = rand(max);
+    const b = rand(max);
     return {
       type: 'xor',
       prompt: `Compute  ${a} XOR ${b}  (decimal):`,
@@ -135,10 +153,12 @@ function normalize(value) {
     .replace(/^0x/, '');
 }
 
-// Build a fresh challenge of a given type (or random if omitted).
-function makeChallenge(type) {
+// Build a fresh challenge of a given type (or random if omitted) at the
+// given difficulty (defaults to 'normal').
+function makeChallenge(type, difficulty = 'normal') {
   const t = type && generators[type] ? type : pick(ALL_TYPES);
-  const c = generators[t]();
+  const d = DIFFICULTIES.includes(difficulty) ? difficulty : 'normal';
+  const c = generators[t](d);
   return {
     id: `${t}-${rand(1e9)}`,
     type: c.type,
@@ -152,4 +172,4 @@ function checkAnswer(challenge, value) {
   return normalize(challenge._answer) === normalize(value);
 }
 
-module.exports = { makeChallenge, checkAnswer, ALL_TYPES, normalize };
+module.exports = { makeChallenge, checkAnswer, ALL_TYPES, DIFFICULTIES, normalize };

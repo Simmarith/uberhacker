@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { socket } from '../socket';
 import Scoreboard, { typeLabel } from './Scoreboard.jsx';
 
-export default function Lobby({ room, you, isHost, types }) {
+export default function Lobby({ room, you, isHost, types, difficulties }) {
   const [target, setTarget] = useState(room.config?.targetScore || 5);
   const [concurrent, setConcurrent] = useState(room.config?.concurrent || 3);
+  const [difficulty, setDifficulty] = useState(room.config?.difficulty || 'normal');
   const [selected, setSelected] = useState(
     () => new Set(room.config?.types || types)
   );
@@ -23,6 +24,7 @@ export default function Lobby({ room, you, isHost, types }) {
     socket.emit('start', {
       targetScore: target,
       concurrent,
+      difficulty,
       types: chosen.length ? chosen : types,
     });
   };
@@ -72,6 +74,22 @@ export default function Lobby({ room, you, isHost, types }) {
                 />
                 <span>at once</span>
               </label>
+
+              <label className="inline">
+                <span>difficulty</span>
+              </label>
+              <div className="typegrid">
+                {difficulties.map((d) => (
+                  <button
+                    key={d}
+                    className={`chip ${difficulty === d ? 'on' : ''}`}
+                    onClick={() => setDifficulty(d)}
+                    type="button"
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
 
               <div className="typegrid">
                 {types.map((t) => (
