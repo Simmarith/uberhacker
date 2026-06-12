@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { socket } from '../socket';
 import Window from './Window.jsx';
 import Calculator from './Calculator.jsx';
+import Chat from './Chat.jsx';
 import { config } from '../config';
 
 function Clock() {
@@ -15,7 +16,7 @@ function Clock() {
 
 // The fake desktop: wallpaper, floating challenge windows, and a taskbar
 // that doubles as the live scoreboard.
-export default function Desktop({ room, you, isHost, windows, onFocus }) {
+export default function Desktop({ room, you, isHost, windows, onFocus, messages, onChat }) {
   const target = room.config?.targetScore;
   const [calcOpen, setCalcOpen] = useState(config.calculatorOpenByDefault);
   return (
@@ -30,6 +31,7 @@ export default function Desktop({ room, you, isHost, windows, onFocus }) {
           <div className="desktop-idle">// loading challenges…</div>
         ) : null}
         {calcOpen ? <Calculator onClose={() => setCalcOpen(false)} /> : null}
+        <Chat mode="game" messages={messages} onSend={onChat} you={you} />
       </div>
 
       <footer className="taskbar">

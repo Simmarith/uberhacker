@@ -46,6 +46,10 @@ io.on('connection', (socket) => {
     if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES, difficulties: DIFFICULTIES });
     r.broadcastState();
 
+    // Backfill the chat log for the new player, then announce their arrival.
+    socket.emit('chatHistory', r.chat);
+    r.addChat({ system: true, text: `${name} joined` });
+
     // If a game is already running, drop the new player straight into it
     // by opening every currently-active challenge window.
     if (r.state === 'playing') {
@@ -53,6 +57,11 @@ io.on('connection', (socket) => {
         socket.emit('challengeOpen', { ...c, startedAt: Date.now() });
       }
     }
+  });
+
+  socket.on('chat', ({ text } = {}) => {
+    const r = roomCode && manager.get(roomCode);
+    if (r) r.addChat({ socketId: socket.id, text });
   });
 
   socket.on('start', (config) => {
@@ -75,9 +84,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     const r = roomCode && manager.get(roomCode);
     if (!r) return;
+    const leaver = r.players.get(socket.id);
     r.removePlayer(socket.id);
     if (r.isEmpty()) manager.delete(roomCode);
-    else r.broadcastState();
+    else {
+      if (leaver) r.addChat({ system: true, text: `${leaver.name} left` });
+      r.broadcastState();
+    }
   });
 });
 

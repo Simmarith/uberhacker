@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { socket } from '../socket';
 import Scoreboard, { typeLabel } from './Scoreboard.jsx';
+import Chat from './Chat.jsx';
 import { disabledByDefault } from '../config';
 
-export default function Lobby({ room, you, isHost, types, difficulties }) {
+export default function Lobby({ room, you, isHost, types, difficulties, messages, onChat }) {
   const [target, setTarget] = useState(room.config?.targetScore || 5);
   const [concurrent, setConcurrent] = useState(room.config?.concurrent || 3);
   const [difficulty, setDifficulty] = useState(room.config?.difficulty || 'normal');
@@ -117,6 +118,7 @@ export default function Lobby({ room, you, isHost, types, difficulties }) {
 
         <aside>
           <Scoreboard players={room.players} you={you} target={room.config?.targetScore} />
+          <Chat mode="lobby" messages={messages} onSend={onChat} you={you} />
         </aside>
       </div>
     </div>

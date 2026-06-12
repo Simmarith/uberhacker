@@ -15,6 +15,35 @@ class Room {
     this.active = new Map(); // challengeId -> challenge (with _answer)
     this.timers = new Set(); // pending refill timeouts
     this.winner = null; // overall game winner
+    this.chat = []; // recent chat log: { id, name, text, ts, system }
+    this.chatSeq = 0; // monotonic message id counter
+  }
+
+  // Append a chat message, cap the log, and broadcast it live. A system
+  // message (join/leave notice) has no author and renders differently.
+  addChat({ socketId, text, system }) {
+    let name;
+    if (system) {
+      name = null;
+    } else {
+      const player = this.players.get(socketId);
+      if (!player) return; // not in this room
+      const clean = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+      if (!clean) return;
+      text = clean;
+      name = player.name;
+    }
+    const msg = {
+      id: ++this.chatSeq,
+      senderId: system ? null : socketId,
+      name,
+      text,
+      ts: Date.now(),
+      system: !!system,
+    };
+    this.chat.push(msg);
+    if (this.chat.length > 50) this.chat.shift();
+    this.io.to(this.code).emit('chatMessage', msg);
   }
 
   isEmpty() {

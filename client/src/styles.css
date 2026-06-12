@@ -449,3 +449,56 @@ button.big { font-size: 1.1rem; padding: 0.8rem; margin-top: 0.6rem; }
   z-index: 9999;
   opacity: 0.95;
 }
+
+/* ---- chat (shared lobby + game) ---- */
+aside { display: flex; flex-direction: column; gap: 1rem; }
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.chat-empty { color: var(--fg-dim); font-style: italic; }
+.chat-msg { word-break: break-word; }
+.chat-msg.system { color: var(--fg-dim); font-size: 0.8rem; }
+.chat-name { color: var(--accent); margin-right: 0.45rem; font-weight: 700; }
+.chat-msg.me .chat-name { color: var(--good); }
+.chat-text { color: var(--fg); }
+
+.chat-form { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+.chat-form input { flex: 1; font-size: 0.95rem; }
+
+/* docked variant (lobby sidebar) */
+.chat.docked {
+  background: rgba(8, 20, 14, 0.8);
+  border: 1px solid var(--fg-dim);
+  border-radius: 6px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+.chat.docked .chat-head {
+  font-size: 0.75rem;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--fg-dim);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.chat.docked .chat-log { max-height: 220px; min-height: 90px; }
+
+/* floating variant (game window) */
+.hackwindow.chat-window { width: 300px; }
+.chatbody { padding: 0.7rem; display: flex; flex-direction: column; }
+.chatbody .chat-log { height: 200px; }
+.chat-toggle {
+  margin-left: auto;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.1rem 0.5rem;
+}

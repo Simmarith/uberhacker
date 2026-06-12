@@ -15,6 +15,7 @@ export default function App() {
   const [difficulties, setDifficulties] = useState(['easy', 'normal', 'hard']);
   const [room, setRoom] = useState(null);
   const [windows, setWindows] = useState([]); // [{ id, challenge, pos, z, solved }]
+  const [messages, setMessages] = useState([]); // chat log, survives lobby<->game
 
   const zRef = useRef(10);
   const openCountRef = useRef(0);
@@ -67,17 +68,28 @@ export default function App() {
       setWindows([]);
       openCountRef.current = 0;
     };
+    const onChatHistory = (log) => setMessages(Array.isArray(log) ? log : []);
+    const onChatMessage = (m) =>
+      setMessages((ms) => (ms.some((x) => x.id === m.id) ? ms : [...ms, m]));
 
     socket.on('roomState', onRoomState);
     socket.on('challengeOpen', onChallengeOpen);
     socket.on('roundResult', onRoundResult);
     socket.on('gameOver', onGameOver);
+    socket.on('chatHistory', onChatHistory);
+    socket.on('chatMessage', onChatMessage);
     return () => {
       socket.off('roomState', onRoomState);
       socket.off('challengeOpen', onChallengeOpen);
       socket.off('roundResult', onRoundResult);
       socket.off('gameOver', onGameOver);
+      socket.off('chatHistory', onChatHistory);
+      socket.off('chatMessage', onChatMessage);
     };
+  }, []);
+
+  const sendChat = useCallback((text) => {
+    socket.emit('chat', { text });
   }, []);
 
   const join = useCallback((room, username) => {
@@ -107,10 +119,22 @@ export default function App() {
         isHost={isHost}
         windows={windows}
         onFocus={focusWindow}
+        messages={messages}
+        onChat={sendChat}
       />
     );
   }
 
   // lobby or over
-  return <Lobby room={room} you={you} isHost={isHost} types={types} difficulties={difficulties} />;
+  return (
+    <Lobby
+      room={room}
+      you={you}
+      isHost={isHost}
+      types={types}
+      difficulties={difficulties}
+      messages={messages}
+      onChat={sendChat}
+    />
+  );
 }
