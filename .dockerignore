@@ -1,0 +1,7 @@
+**/node_modules
+client/dist
+**/*.log
+.git
+.github
+.DS_Store
+README.md
