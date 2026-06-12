@@ -12,7 +12,11 @@ export default function Window({ win, onFocus }) {
   const drag = useRef(null);
 
   useEffect(() => {
-    if (!solved && inputRef.current) inputRef.current.focus();
+    if (solved || !inputRef.current) return;
+    // Don't rip focus away if the user is already typing in another input.
+    const active = document.activeElement;
+    if (active && active !== inputRef.current && active.tagName === 'INPUT') return;
+    inputRef.current.focus();
   }, [solved]);
 
   const submit = (e) => {
