@@ -59,9 +59,9 @@ const WORD_POOL = [
 const DIFFICULTIES = ['easy', 'normal', 'hard'];
 
 const DIFFICULTY_CONFIG = {
-  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 2, reparent: { commits: 3, prefix: 4 } },
-  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 3, reparent: { commits: 4, prefix: 5 } },
-  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 5, reparent: { commits: 5, prefix: 7 } },
+  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 1, reparent: { commits: 5, prefix: 7 } },
+  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 2, reparent: { commits: 8, prefix: 10 } },
+  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 4, reparent: { commits: 15, prefix: 12 } },
 };
 
 function cfg(difficulty) {
