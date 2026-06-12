@@ -9,6 +9,7 @@ const TYPE_LABELS = {
   binToDec: 'bin → dec',
   xor: 'bitwise xor',
   portKnock: 'port knock',
+  gitReparent: 'git re-parent',
 };
 
 export function typeLabel(t) {

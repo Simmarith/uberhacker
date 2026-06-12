@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { socket } from '../socket';
 import { typeLabel } from './Scoreboard.jsx';
 import PortKnock from './PortKnock.jsx';
+import GitReparent from './GitReparent.jsx';
 
 // A single draggable challenge window in the fake desktop.
 export default function Window({ win, onFocus }) {
@@ -97,6 +98,8 @@ export default function Window({ win, onFocus }) {
           <p className="prompt">{challenge.prompt}</p>
           {challenge.type === 'portKnock' ? (
             <PortKnock challenge={challenge} onAnswer={sendAnswer} />
+          ) : challenge.type === 'gitReparent' ? (
+            <GitReparent challenge={challenge} onAnswer={sendAnswer} />
           ) : (
             <form onSubmit={submit}>
               <span className="caret">&gt;</span>

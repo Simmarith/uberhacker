@@ -31,6 +31,23 @@ function maskOctets(cidr) {
 
 // ---- generators ----------------------------------------------------------
 
+// Hacker-flavoured commit subjects for the Git Re-Parent challenge.
+const COMMIT_MSGS = [
+  'init repo', 'add auth middleware', 'fix off-by-one', 'refactor parser',
+  'patch buffer overflow', 'bump deps', 'wire up sockets', 'inject payload',
+  'spoof headers', 'rotate keys', 'cache busting', 'handle edge case',
+  'silence linter', 'add rootkit hook', 'tune firewall rules', 'seed rng',
+  'harden tls', 'drop privileges', 'flush dns', 'fork daemon',
+];
+
+const HEX = '0123456789abcdef';
+
+function randSha(len) {
+  let s = '';
+  for (let i = 0; i < len; i++) s += HEX[rand(15)];
+  return s;
+}
+
 const WORD_POOL = [
   'override', 'mainframe', 'firewall', 'payload', 'kernel', 'exploit',
   'backdoor', 'sudo', 'packet', 'subnet', 'daemon', 'cipher', 'rootkit',
@@ -42,9 +59,9 @@ const WORD_POOL = [
 const DIFFICULTIES = ['easy', 'normal', 'hard'];
 
 const DIFFICULTY_CONFIG = {
-  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 2 },
-  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 3 },
-  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 5 },
+  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 2, reparent: { commits: 3, prefix: 4 } },
+  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 3, reparent: { commits: 4, prefix: 5 } },
+  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 5, reparent: { commits: 5, prefix: 7 } },
 };
 
 function cfg(difficulty) {
@@ -151,6 +168,33 @@ const generators = {
       prompt: `Compute  ${a} XOR ${b}  (decimal):`,
       answer: String(a ^ b),
       hint: 'Bits differ -> 1.',
+    };
+  },
+
+  // A tiny commit chain; move HEAD to the commit whose SHA starts with the
+  // given prefix. Harder = more commits and a longer prefix to match.
+  gitReparent(difficulty) {
+    const { commits: n, prefix: plen } = cfg(difficulty).reparent;
+    const SHA_LEN = 10;
+    const commits = [];
+    const seenPrefix = new Set();
+    for (let i = 0; i < n; i++) {
+      let sha;
+      // Keep prefixes distinct so exactly one commit matches the target.
+      do {
+        sha = randSha(SHA_LEN);
+      } while (seenPrefix.has(sha.slice(0, plen)));
+      seenPrefix.add(sha.slice(0, plen));
+      commits.push({ sha, message: pick(COMMIT_MSGS) });
+    }
+    const target = commits[rand(n - 1)];
+    const prefix = target.sha.slice(0, plen);
+    return {
+      type: 'gitReparent',
+      prompt: `Move HEAD to the commit whose SHA starts with  ${prefix}`,
+      answer: target.sha,
+      hint: 'Drag the HEAD pointer onto the matching commit.',
+      data: { commits, prefix }, // public: the graph UI needs the commit list
     };
   },
 };
