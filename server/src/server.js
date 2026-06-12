@@ -95,7 +95,9 @@ io.on('connection', (socket) => {
 });
 
 // SPA fallback: anything not matched above returns the client.
-app.get('*', (req, res) => {
+// Express 5 / path-to-regexp v8 no longer accepts a bare '*' path, so match
+// any remaining GET with a regex instead.
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(clientDist, 'index.html'), (err) => {
     if (err) res.status(404).send('Client not built. Run `npm run build`.');
   });
