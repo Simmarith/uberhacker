@@ -9,7 +9,22 @@ export default function Window({ win, onFocus }) {
   const [shake, setShake] = useState(false);
   const [xy, setXy] = useState(pos);
   const inputRef = useRef(null);
+  const rootRef = useRef(null);
   const drag = useRef(null);
+
+  // Once rendered we know the real size; nudge back in if any edge clips off-screen.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const TASKBAR = 48;
+    const maxX = Math.max(0, window.innerWidth - el.offsetWidth);
+    const maxY = Math.max(0, window.innerHeight - el.offsetHeight - TASKBAR);
+    setXy((p) => {
+      const x = Math.min(Math.max(0, p.x), maxX);
+      const y = Math.min(Math.max(0, p.y), maxY);
+      return x === p.x && y === p.y ? p : { x, y };
+    });
+  }, []);
 
   useEffect(() => {
     if (solved || !inputRef.current) return;
@@ -53,6 +68,7 @@ export default function Window({ win, onFocus }) {
 
   return (
     <div
+      ref={rootRef}
       className={`hackwindow ${shake ? 'shake' : ''} ${solved ? 'solved' : ''}`}
       style={{ left: xy.x, top: xy.y, zIndex: z }}
       onMouseDown={() => onFocus(id)}

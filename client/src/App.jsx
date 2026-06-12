@@ -20,11 +20,17 @@ export default function App() {
   const openCountRef = useRef(0);
 
   const nextPos = () => {
-    // Cascade windows diagonally, wrapping so they stay on screen.
-    const n = openCountRef.current++;
-    const col = n % 5;
-    const row = Math.floor(n / 5) % 3;
-    return { x: 60 + col * 70 + row * 24, y: 50 + col * 40 + row * 90 };
+    // Spawn at a random spot, clamped so the whole window stays on screen.
+    openCountRef.current++;
+    const WIN_W = 340; // .hackwindow width
+    const WIN_H = 260; // generous height estimate (content varies)
+    const TASKBAR = 48; // reserve footer height at the bottom
+    const maxX = Math.max(0, window.innerWidth - WIN_W);
+    const maxY = Math.max(0, window.innerHeight - WIN_H - TASKBAR);
+    return {
+      x: Math.round(Math.random() * maxX),
+      y: Math.round(Math.random() * maxY),
+    };
   };
 
   const focusWindow = useCallback((id) => {
