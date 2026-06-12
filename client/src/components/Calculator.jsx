@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const KEYS = [
   ['C', '←', '%', '/'],
@@ -6,6 +6,17 @@ const KEYS = [
   ['4', '5', '6', '-'],
   ['1', '2', '3', '+'],
   ['0', '.', '='],
+];
+
+// Logical navigation grid. '0' spans two columns in the layout, so it
+// occupies two cells here; every other value is unique, which lets us
+// match the selected button by value alone.
+const GRID = [
+  ['C', '←', '%', '/'],
+  ['7', '8', '9', '*'],
+  ['4', '5', '6', '-'],
+  ['1', '2', '3', '+'],
+  ['0', '0', '.', '='],
 ];
 
 // Evaluate a flat "a op b op c" expression left-to-right with standard
@@ -45,13 +56,88 @@ function compute(expr) {
 export default function Calculator({ onClose }) {
   const [expr, setExpr] = useState('');
   const [xy, setXy] = useState({ x: 220, y: 120 });
+  const [focused, setFocused] = useState(false);
+  // 'select' = arrow-key navigation; 'keyboard' = direct typing.
+  const [mode, setMode] = useState('select');
+  const [sel, setSel] = useState({ r: 1, c: 0 });
   const drag = useRef(null);
+  const winRef = useRef(null);
+
+  useEffect(() => {
+    winRef.current?.focus();
+  }, []);
 
   const press = (k) => {
     if (k === 'C') return setExpr('');
     if (k === '←') return setExpr((e) => e.slice(0, -1));
     if (k === '=') return setExpr((e) => compute(e));
     setExpr((e) => (e === 'ERR' ? k : e + k));
+  };
+
+  // Clicking a key acts on it and returns to "selecting keys" mode,
+  // moving the selection to the clicked key.
+  const clickKey = (k) => {
+    const found = findCell(k);
+    if (found) setSel(found);
+    setMode('select');
+    press(k);
+    winRef.current?.focus();
+  };
+
+  const findCell = (k) => {
+    for (let r = 0; r < GRID.length; r++) {
+      const c = GRID[r].indexOf(k);
+      if (c !== -1) return { r, c };
+    }
+    return null;
+  };
+
+  const move = (s, dir) => {
+    let { r, c } = s;
+    if (dir === 'ArrowUp') r = Math.max(0, r - 1);
+    else if (dir === 'ArrowDown') r = Math.min(GRID.length - 1, r + 1);
+    else if (dir === 'ArrowLeft') c = Math.max(0, c - 1);
+    else if (dir === 'ArrowRight') c = Math.min(GRID[0].length - 1, c + 1);
+    return { r, c };
+  };
+
+  const onKeyDown = (e) => {
+    const k = e.key;
+    if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowRight') {
+      e.preventDefault();
+      setMode('select');
+      setSel((s) => move(s, k));
+      return;
+    }
+    if (k === 'Enter') {
+      e.preventDefault();
+      // Select mode: activate the highlighted key. Keyboard mode: compute.
+      if (mode === 'select') return press(GRID[sel.r][sel.c]);
+      return press('=');
+    }
+    if (k === '=') {
+      e.preventDefault();
+      return press('=');
+    }
+    if (k === 'Backspace') {
+      e.preventDefault();
+      setMode('keyboard');
+      return press('←');
+    }
+    if (k === 'Escape') {
+      e.preventDefault();
+      return winRef.current?.blur();
+    }
+    if (k === 'c' || k === 'C' || k === 'Delete') {
+      e.preventDefault();
+      setMode('keyboard');
+      return press('C');
+    }
+    if (/^[0-9]$/.test(k) || '+-*/%.'.includes(k)) {
+      e.preventDefault();
+      setMode('keyboard');
+      return press(k);
+    }
   };
 
   const onDown = (e) => {
@@ -72,8 +158,19 @@ export default function Calculator({ onClose }) {
     window.removeEventListener('mouseup', onUp);
   };
 
+  const selKey = GRID[sel.r][sel.c];
+  const showSel = focused && mode === 'select';
+
   return (
-    <div className="hackwindow calc" style={{ left: xy.x, top: xy.y, zIndex: 5000 }}>
+    <div
+      ref={winRef}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      className={`hackwindow calc ${focused ? 'focused' : ''}`}
+      style={{ left: xy.x, top: xy.y, zIndex: 5000 }}
+    >
       <div className="windowbar" onMouseDown={onDown}>
         <span className="dot r" onMouseDown={(e) => e.stopPropagation()} onClick={onClose} />
         <span className="dot y" /><span className="dot g" />
@@ -85,8 +182,12 @@ export default function Calculator({ onClose }) {
           {KEYS.flat().map((k) => (
             <button
               key={k}
-              className={`calc-key ${k === '0' ? 'wide' : ''} ${/[+\-*/%=]/.test(k) ? 'op' : ''}`}
-              onClick={() => press(k)}
+              tabIndex={-1}
+              className={`calc-key ${k === '0' ? 'wide' : ''} ${/[+\-*/%=]/.test(k) ? 'op' : ''} ${
+                showSel && k === selKey ? 'selected' : ''
+              }`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => clickKey(k)}
             >
               {k}
             </button>
