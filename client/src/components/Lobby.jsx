@@ -9,9 +9,7 @@ export default function Lobby({ room, you, isHost, types, difficulties }) {
   const [difficulty, setDifficulty] = useState(room.config?.difficulty || 'normal');
   const [selected, setSelected] = useState(
     () =>
-      room.config?.types
-        ? new Set(room.config.types)
-        : new Set(types.filter((t) => !disabledByDefault.has(t)))
+      new Set((room.config?.types || types).filter((t) => !disabledByDefault.has(t)))
   );
 
   const toggle = (t) => {
