@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { socket } from '../socket';
 import Scoreboard, { typeLabel } from './Scoreboard.jsx';
+import { disabledByDefault } from '../config';
 
 export default function Lobby({ room, you, isHost, types, difficulties }) {
   const [target, setTarget] = useState(room.config?.targetScore || 5);
   const [concurrent, setConcurrent] = useState(room.config?.concurrent || 3);
   const [difficulty, setDifficulty] = useState(room.config?.difficulty || 'normal');
   const [selected, setSelected] = useState(
-    () => new Set(room.config?.types || types)
+    () =>
+      room.config?.types
+        ? new Set(room.config.types)
+        : new Set(types.filter((t) => !disabledByDefault.has(t)))
   );
 
   const toggle = (t) => {

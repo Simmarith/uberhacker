@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { socket } from '../socket';
 import Window from './Window.jsx';
 import Calculator from './Calculator.jsx';
+import { config } from '../config';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -16,7 +17,7 @@ function Clock() {
 // that doubles as the live scoreboard.
 export default function Desktop({ room, you, isHost, windows, onFocus }) {
   const target = room.config?.targetScore;
-  const [calcOpen, setCalcOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(config.calculatorOpenByDefault);
   return (
     <div className="desktop">
       <div className="desktop-watermark">uberhacker_OS</div>

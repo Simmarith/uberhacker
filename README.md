@@ -22,6 +22,22 @@ Look like all those ridiculous hackers on TV. (Except Mr. Robot.)
 
 The host picks which challenge types are in play and the target score.
 
+## Client config
+
+`client/src/config.js` holds hardcoded client-side defaults:
+
+- `config.calculatorOpenByDefault` (`true`) — the desktop's calculator window
+  starts open. The `calc` taskbar button toggles it.
+- `disabledByDefault` — a `Set` of challenge `type` values that start
+  **deselected** in the lobby. The host can still click them back on before
+  starting; they're just off by default. Keys must match the server challenge
+  `type` strings (`fastType`, `getNet`, `broadcast`, `hexToDec`, `decToHex`,
+  `binToDec`, `xor`). Remove a type to have it selected by default.
+
+  ⚠️ If the host starts with **zero** challenge types selected, the lobby falls
+  back to enabling **all** of them — so don't disable every type by default
+  unless you also expect the host to pick at least one.
+
 ## Stack
 
 - **Server** — Node + Express + [socket.io](https://socket.io) (`server/`)
