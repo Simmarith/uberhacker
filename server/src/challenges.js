@@ -59,9 +59,9 @@ const WORD_POOL = [
 const DIFFICULTIES = ['easy', 'normal', 'hard'];
 
 const DIFFICULTY_CONFIG = {
-  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 1, reparent: { commits: 5, prefix: 7 } },
-  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 2, reparent: { commits: 8, prefix: 10 } },
-  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 4, reparent: { commits: 15, prefix: 12 } },
+  easy: { words: 1, cidrs: [8, 16, 24], maxNum: 15, bits: 4, xorMax: 15, knockPorts: 1, knockOffset: 60, reparent: { commits: 5, prefix: 7 } },
+  normal: { words: 2, cidrs: [8, 16, 24], maxNum: 255, bits: 8, xorMax: 255, knockPorts: 2, knockOffset: 250, reparent: { commits: 8, prefix: 10 } },
+  hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 4, knockOffset: 900, reparent: { commits: 15, prefix: 12 } },
 };
 
 function cfg(difficulty) {
@@ -145,16 +145,18 @@ const generators = {
   },
 
   // Knock a sequence of ports on a safe-style rotary dial. Harder = more
-  // ports in the sequence. Ports are kept in 1..9999.
+  // ports in the sequence, and the dial starts further from each target.
+  // Ports are kept in 1..9999.
   portKnock(difficulty) {
-    const count = cfg(difficulty).knockPorts;
+    const { knockPorts: count, knockOffset } = cfg(difficulty);
     const ports = Array.from({ length: count }, () => 1 + rand(9998));
     return {
       type: 'portKnock',
       prompt: `Knock these ports in order:  ${ports.join(' → ')}`,
       answer: ports.join('-'),
       hint: 'Dial each port on the safe, then knock it in sequence.',
-      data: { ports }, // public: the dial UI needs the target sequence
+      // public: the dial UI needs the target sequence and the per-target start offset
+      data: { ports, knockOffset },
     };
   },
 

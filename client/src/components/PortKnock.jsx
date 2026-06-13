@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 // Ports run 1..9999; the dial wraps modulo 10000. One full rotation moves the
-// value by PER_TURN, so reaching a 4-digit port takes several spins.
+// value by PER_TURN, so reaching a 4-digit port takes many spins.
 const SLOTS = 10000;
-const PER_TURN = 1000;
+const PER_TURN = 100;
 
 // A safe-style rotary dial. The player reproduces a target sequence of ports
 // by dialling each one and "knocking" it. Spin the dial (drag in circles, as
@@ -11,6 +11,9 @@ const PER_TURN = 1000;
 // arrow keys, or the scroll wheel.
 export default function PortKnock({ challenge, onAnswer }) {
   const targets = challenge.ports || [];
+  // Difficulty sets how far below the current target the dial starts; the
+  // player spins up from there to reach it.
+  const offset = challenge.knockOffset ?? PER_TURN;
   const [value, setValue] = useState(0);
   const [knocked, setKnocked] = useState([]);
   const rootRef = useRef(null);
@@ -22,6 +25,16 @@ export default function PortKnock({ challenge, onAnswer }) {
   useEffect(() => {
     rootRef.current?.focus();
   }, []);
+
+  // Park the dial `offset` ports below each target as it becomes current.
+  const done = knocked.length;
+  useEffect(() => {
+    const t = targets[done];
+    if (t == null) return;
+    const start = (t - offset + SLOTS) % SLOTS;
+    acc.current = start;
+    setValue(start);
+  }, [done]);
 
   // Pointer angle around the dial centre: 0 at the top, clockwise, in degrees.
   const pointerAngle = (e) => {
@@ -94,7 +107,6 @@ export default function PortKnock({ challenge, onAnswer }) {
     }
   };
 
-  const done = knocked.length;
   const angle = ((value % PER_TURN) / PER_TURN) * 360;
 
   return (
