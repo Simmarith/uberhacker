@@ -2,8 +2,8 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const { RoomManager } = require('./rooms');
-const { ALL_TYPES, DIFFICULTIES } = require('./challenges');
+const { RoomManager, Room } = require('./rooms');
+const { ALL_TYPES, DIFFICULTIES, makeChallenge, checkAnswer } = require('./challenges');
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,6 +11,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 const manager = new RoomManager(io);
+
+// Per-socket lobby practice challenges. Lives outside any Room so it never
+// touches scoring or the game loop. socket.id -> challenge (with _answer).
+const demos = new Map();
 
 // Serve the built client (client/dist) if it exists.
 const clientDist = path.resolve(__dirname, '../../client/dist');
@@ -91,6 +95,20 @@ io.on('connection', (socket) => {
     if (ack) ack({ result });
   });
 
+  // Lobby practice: generate an unscored demo challenge and hold its answer
+  // server-side so checking reuses the real verification path.
+  socket.on('demo', ({ type, difficulty } = {}, ack) => {
+    const ch = makeChallenge(type, difficulty);
+    demos.set(socket.id, ch);
+    if (ack) ack({ ok: true, challenge: Room.safe(ch) });
+  });
+
+  socket.on('demoAnswer', ({ value } = {}, ack) => {
+    const ch = demos.get(socket.id);
+    if (!ch) return ack && ack({ result: 'closed' });
+    if (ack) ack({ result: checkAnswer(ch, value) ? 'correct' : 'wrong' });
+  });
+
   socket.on('stop', () => {
     const r = roomCode && manager.get(roomCode);
     if (r && socket.id === r.hostId) {
@@ -100,6 +118,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    demos.delete(socket.id);
     const r = roomCode && manager.get(roomCode);
     if (!r) return;
     const leaver = r.players.get(socket.id);

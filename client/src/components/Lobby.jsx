@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { socket } from '../socket';
 import Scoreboard, { typeLabel } from './Scoreboard.jsx';
 import Chat from './Chat.jsx';
+import Practice from './Practice.jsx';
 import { disabledByDefault } from '../config';
 
 export default function Lobby({ room, you, isHost, types, difficulties, messages, onChat }) {
@@ -125,6 +126,8 @@ export default function Lobby({ room, you, isHost, types, difficulties, messages
           ) : (
             <p className="hint">waiting for the host (★) to start the game…</p>
           )}
+
+          <Practice types={types} difficulties={difficulties} defaultDifficulty={difficulty} />
         </main>
 
         <aside>
