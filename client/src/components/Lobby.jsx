@@ -107,6 +107,17 @@ export default function Lobby({ room, you, isHost, types, difficulties, messages
                 ))}
               </div>
 
+              <label className="inline">
+                <span>visibility</span>
+                <button
+                  className={`chip ${room.public ? 'on' : ''}`}
+                  onClick={() => socket.emit('setPublic', { public: !room.public })}
+                  type="button"
+                >
+                  {room.public ? 'public — listed on login' : 'private'}
+                </button>
+              </label>
+
               <button className="big" onClick={start} type="button">
                 &gt; {isOver ? 'play again' : 'start game'}
               </button>

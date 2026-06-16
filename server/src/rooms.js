@@ -11,6 +11,7 @@ class Room {
     this.players = new Map(); // socketId -> { id, name, score }
     this.hostId = null;
     this.state = 'lobby'; // lobby | playing | over
+    this.public = false; // listed on the join page for anyone to find
     this.config = { targetScore: 5, concurrent: 3, types: ALL_TYPES, difficulty: 'normal' };
     this.active = new Map(); // challengeId -> challenge (with _answer)
     this.timers = new Set(); // pending refill timeouts
@@ -74,6 +75,7 @@ class Room {
     return {
       code: this.code,
       state: this.state,
+      public: this.public,
       hostId: this.hostId,
       config: this.config,
       players: this.scoreboard(),
@@ -226,6 +228,19 @@ class RoomManager {
     const room = this.rooms.get(code);
     if (room) room.clearTimers();
     this.rooms.delete(code);
+  }
+
+  // Public rooms still waiting in the lobby, for the join-page browser.
+  publicList() {
+    return [...this.rooms.values()]
+      .filter((r) => r.public && r.state === 'lobby')
+      .map((r) => ({ code: r.code, players: r.players.size }))
+      .sort((a, b) => a.code.localeCompare(b.code));
+  }
+
+  // Push the public-room list to every connected client (joined or not).
+  broadcastPublic() {
+    this.io.emit('publicRooms', this.publicList());
   }
 }
 

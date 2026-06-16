@@ -31,6 +31,9 @@ function sanitizeCode(code) {
 io.on('connection', (socket) => {
   let roomCode = null;
 
+  // Seed the join-page lobby browser with the current public rooms.
+  socket.emit('publicRooms', manager.publicList());
+
   socket.on('join', ({ room, username }, ack) => {
     const code = sanitizeCode(room);
     const name = sanitizeName(username);
@@ -45,6 +48,7 @@ io.on('connection', (socket) => {
 
     if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES, difficulties: DIFFICULTIES });
     r.broadcastState();
+    manager.broadcastPublic();
 
     // Backfill the chat log for the new player, then announce their arrival.
     socket.emit('chatHistory', r.chat);
@@ -66,7 +70,18 @@ io.on('connection', (socket) => {
 
   socket.on('start', (config) => {
     const r = roomCode && manager.get(roomCode);
-    if (r && socket.id === r.hostId) r.start(config || {});
+    if (r && socket.id === r.hostId) {
+      r.start(config || {});
+      manager.broadcastPublic(); // room left the lobby, drop it from the list
+    }
+  });
+
+  socket.on('setPublic', ({ public: isPublic } = {}) => {
+    const r = roomCode && manager.get(roomCode);
+    if (!r || socket.id !== r.hostId) return;
+    r.public = !!isPublic;
+    r.broadcastState();
+    manager.broadcastPublic();
   });
 
   socket.on('answer', ({ challengeId, value }, ack) => {
@@ -78,7 +93,10 @@ io.on('connection', (socket) => {
 
   socket.on('stop', () => {
     const r = roomCode && manager.get(roomCode);
-    if (r && socket.id === r.hostId) r.stop();
+    if (r && socket.id === r.hostId) {
+      r.stop();
+      manager.broadcastPublic(); // back in the lobby, may reappear in the list
+    }
   });
 
   socket.on('disconnect', () => {
@@ -91,6 +109,7 @@ io.on('connection', (socket) => {
       if (leaver) r.addChat({ system: true, text: `${leaver.name} left` });
       r.broadcastState();
     }
+    manager.broadcastPublic(); // player count changed or room vanished
   });
 });
 

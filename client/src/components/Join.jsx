@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Join({ onJoin }) {
+export default function Join({ onJoin, publicRooms = [] }) {
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
 
@@ -39,6 +39,24 @@ export default function Join({ onJoin }) {
         </label>
         <button type="submit">&gt; connect</button>
       </form>
+
+      {publicRooms.length > 0 && (
+        <div className="panel publicrooms">
+          <span className="publictitle">// public lobbies</span>
+          <div className="typegrid">
+            {publicRooms.map((r) => (
+              <button
+                key={r.code}
+                type="button"
+                className={`chip ${room === r.code ? 'on' : ''}`}
+                onClick={() => setRoom(r.code)}
+              >
+                {r.code} ({r.players})
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <p className="hint">share the gameroom name with friends to play together.</p>
     </div>

@@ -205,6 +205,9 @@ button.big { font-size: 1.1rem; padding: 0.8rem; margin-top: 0.6rem; }
 .windowbody form input { flex: 1; font-size: 1.1rem; }
 .hintline { color: var(--fg-dim); font-size: 0.8rem; margin-top: 0.9rem; }
 
+.publicrooms { margin-top: 1rem; }
+.publictitle { display: block; color: var(--fg-dim); font-size: 0.8rem; margin-bottom: 0.6rem; }
+
 .result h2 { margin: 0 0 0.6rem; }
 .result .good { color: var(--good); }
 .result .bad { color: var(--accent); }
