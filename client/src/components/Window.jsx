@@ -30,9 +30,11 @@ export default function Window({ win, onFocus }) {
 
   useEffect(() => {
     if (solved || !inputRef.current) return;
-    // Don't rip focus away if the user is already typing in another input.
+    // Don't rip focus away if the user is already interacting with something
+    // else (another challenge input, the calculator window, etc). document.body
+    // is the "nothing focused yet" case, so initial autofocus still works.
     const active = document.activeElement;
-    if (active && active !== inputRef.current && active.tagName === 'INPUT') return;
+    if (active && active !== inputRef.current && active !== document.body) return;
     inputRef.current.focus();
   }, [solved]);
 
