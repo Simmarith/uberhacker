@@ -10,17 +10,26 @@ Look like all those ridiculous hackers on TV. (Except Mr. Robot.)
 
 ## Challenges
 
-| type            | task                                            |
-|-----------------|-------------------------------------------------|
-| network addr    | given `IP/CIDR`, give the network address       |
-| broadcast addr  | given `IP/CIDR`, give the broadcast address     |
-| hex → dec       | convert a hex byte to decimal                   |
-| dec → hex       | convert a decimal byte to hex                   |
-| bin → dec       | convert a binary byte to decimal                |
-| bitwise xor     | XOR two bytes                                    |
-| fast type       | type the word as fast as you can                |
+| game | task |
+|---|---|
+| fast type | type a hacker-flavoured phrase exactly |
+| network addr | calculate network address from `IP/CIDR` |
+| broadcast addr | calculate broadcast address from `IP/CIDR` |
+| hex → dec / dec → hex / bin → dec | quick number-base conversions |
+| bitwise xor | calculate decimal XOR |
+| port knock | dial and knock ports in sequence |
+| git re-parent | drag `HEAD` onto SHA-prefix target |
+| phish hunter | report spoofed mail sender |
+| packet sniffer | identify exfiltration, scans, DNS tunnels, or C2 traffic |
+| access control | pick least-privilege policy; some rounds test correct permission but wrong scope |
+| hash hunt | select release digest matching SHA-256 prefix |
 
-The host picks which challenge types are in play and the target score.
+Host controls include target score, concurrent windows, difficulty, game
+rotation, and public/private lobby visibility. Difficulty applies to every game:
+it changes challenge size, choices, deception, or precision as appropriate.
+
+The lobby also has an unscored practice panel with its own game and difficulty
+pickers. Team chat persists between lobby and game.
 
 ## Client config
 
@@ -32,7 +41,9 @@ The host picks which challenge types are in play and the target score.
   **deselected** in the lobby. The host can still click them back on before
   starting; they're just off by default. Keys must match the server challenge
   `type` strings (`fastType`, `getNet`, `broadcast`, `hexToDec`, `decToHex`,
-  `binToDec`, `xor`). Remove a type to have it selected by default.
+  `binToDec`, `xor`, `portKnock`, `gitReparent`, `phishHunter`,
+  `packetSniffer`, `accessControl`, `hashHunt`). Remove a type to have it
+  selected by default.
 
   ⚠️ If the host starts with **zero** challenge types selected, the lobby falls
   back to enabling **all** of them — so don't disable every type by default
@@ -85,13 +96,13 @@ npm run dev:client   # vite dev server on :5173  <- open this
 - `server/src/challenges.js` — pure generators. Each makes a challenge with a
   prompt and a server-only answer; answers are normalized (case/whitespace) on
   check.
-- `server/src/rooms.js` — `Room` holds players, scores, the current challenge,
-  and the competitive game loop (first correct answer wins the round, next
-  challenge after a short delay, game ends at the target score). `RoomManager`
-  creates/destroys rooms on demand.
+- `server/src/rooms.js` — `Room` holds players, scores, active challenges,
+  lobby visibility, chat, and the competitive game loop. First correct answer
+  wins each window; a replacement opens after a short delay. `RoomManager`
+  creates/destroys rooms on demand and lists public lobbies.
 - `server/src/server.js` — Express static serving + socket.io wiring.
-- `client/src/` — React screens: `Join` → `Lobby` → `Game`, a live
-  `Scoreboard`, talking to the server over socket.io.
+- `client/src/` — React screens: `Join` → `Lobby` → desktop game, shared chat,
+  practice mode, live scoreboard, and mouse/keyboard challenge interfaces.
 
 ## License
 
