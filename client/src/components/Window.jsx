@@ -3,6 +3,8 @@ import { socket } from '../socket';
 import { typeLabel } from './Scoreboard.jsx';
 import PortKnock from './PortKnock.jsx';
 import GitReparent from './GitReparent.jsx';
+import PhishHunter from './PhishHunter.jsx';
+import { AccessControl, HashHunt, PacketSniffer } from './ChoiceGames.jsx';
 
 // A single draggable challenge window in the fake desktop.
 export default function Window({ win, onFocus }) {
@@ -102,6 +104,14 @@ export default function Window({ win, onFocus }) {
             <PortKnock challenge={challenge} onAnswer={sendAnswer} />
           ) : challenge.type === 'gitReparent' ? (
             <GitReparent challenge={challenge} onAnswer={sendAnswer} />
+          ) : challenge.type === 'phishHunter' ? (
+            <PhishHunter challenge={challenge} onAnswer={sendAnswer} />
+          ) : challenge.type === 'packetSniffer' ? (
+            <PacketSniffer challenge={challenge} onAnswer={sendAnswer} />
+          ) : challenge.type === 'accessControl' ? (
+            <AccessControl challenge={challenge} onAnswer={sendAnswer} />
+          ) : challenge.type === 'hashHunt' ? (
+            <HashHunt challenge={challenge} onAnswer={sendAnswer} />
           ) : (
             <form onSubmit={submit}>
               <span className="caret">&gt;</span>

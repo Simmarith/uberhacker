@@ -79,9 +79,7 @@ export default function Lobby({ room, you, isHost, types, difficulties, messages
                 <span>at once</span>
               </label>
 
-              <label className="inline">
-                <span>difficulty</span>
-              </label>
+              <div className="setting-label">difficulty</div>
               <div className="typegrid">
                 {difficulties.map((d) => (
                   <button
@@ -95,6 +93,7 @@ export default function Lobby({ room, you, isHost, types, difficulties, messages
                 ))}
               </div>
 
+              <div className="setting-label">games in rotation</div>
               <div className="typegrid">
                 {types.map((t) => (
                   <button

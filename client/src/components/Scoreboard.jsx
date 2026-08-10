@@ -10,6 +10,10 @@ const TYPE_LABELS = {
   xor: 'bitwise xor',
   portKnock: 'port knock',
   gitReparent: 'git re-parent',
+  phishHunter: 'phish hunter',
+  packetSniffer: 'packet sniffer',
+  accessControl: 'access control',
+  hashHunt: 'hash hunt',
 };
 
 export function typeLabel(t) {

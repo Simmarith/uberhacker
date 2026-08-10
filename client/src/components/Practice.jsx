@@ -3,6 +3,8 @@ import { socket } from '../socket';
 import { typeLabel } from './Scoreboard.jsx';
 import PortKnock from './PortKnock.jsx';
 import GitReparent from './GitReparent.jsx';
+import PhishHunter from './PhishHunter.jsx';
+import { AccessControl, HashHunt, PacketSniffer } from './ChoiceGames.jsx';
 
 // Inline lobby practice panel: pick a game, get a real (unscored) instance from
 // the server, answer it, get instant feedback, pull a fresh one. Reuses the
@@ -110,6 +112,14 @@ export default function Practice({ types, difficulties, defaultDifficulty }) {
               <PortKnock key={challenge.id} challenge={challenge} onAnswer={submit} />
             ) : special === 'gitReparent' ? (
               <GitReparent key={challenge.id} challenge={challenge} onAnswer={submit} />
+            ) : special === 'phishHunter' ? (
+              <PhishHunter key={challenge.id} challenge={challenge} onAnswer={submit} />
+            ) : special === 'packetSniffer' ? (
+              <PacketSniffer key={challenge.id} challenge={challenge} onAnswer={submit} />
+            ) : special === 'accessControl' ? (
+              <AccessControl key={challenge.id} challenge={challenge} onAnswer={submit} />
+            ) : special === 'hashHunt' ? (
+              <HashHunt key={challenge.id} challenge={challenge} onAnswer={submit} />
             ) : (
               <form onSubmit={onFormSubmit}>
                 <span className="caret">&gt;</span>
