@@ -1,0 +1,240 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "joyia": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Joyia",
+      "options": {
+        "baseURL": "https://llmgw.joyia.p7s1.io/v1",
+        "apiKey": "sk-MQtsylOhY51PHzqlKnPXig"
+      },
+      "models": {
+        "claude-haiku": {
+          "name": "Claude Haiku"
+        },
+        "claude-opus": {
+          "name": "Claude Opus"
+        },
+        "claude-sonnet": {
+          "name": "Claude Sonnet"
+        },
+        "deepseek-flash": {
+          "name": "Deepseek Flash"
+        },
+        "deepseek-pro": {
+          "name": "Deepseek Pro"
+        },
+        "gemini-flash": {
+          "name": "Gemini Flash"
+        },
+        "gemini-flash-lite": {
+          "name": "Gemini Flash Lite"
+        },
+        "gemini-pro": {
+          "name": "Gemini Pro"
+        },
+        "gpt-image": {
+          "name": "Gpt Image"
+        },
+        "claude-opus-4-8": {
+          "name": "Claude Opus 4 8"
+        },
+        "claude-opus-5": {
+          "name": "Claude Opus 5"
+        },
+        "claude-sonnet-5": {
+          "name": "Claude Sonnet 5"
+        },
+        "claude-haiku-4-5": {
+          "name": "Claude Haiku 4 5"
+        },
+        "claude-sonnet-4-6": {
+          "name": "Claude Sonnet 4 6"
+        },
+        "gpt-sol": {
+          "name": "Gpt Sol"
+        },
+        "gpt-luna": {
+          "name": "Gpt Luna"
+        },
+        "gpt-terra": {
+          "name": "Gpt Terra"
+        },
+        "gpt-latest": {
+          "name": "Gpt Latest"
+        },
+        "claude-opus-4-6": {
+          "name": "Claude Opus 4 6"
+        },
+        "claude-opus-4-7": {
+          "name": "Claude Opus 4 7"
+        },
+        "gpt-mini-latest": {
+          "name": "Gpt Mini Latest"
+        },
+        "gpt-nano-latest": {
+          "name": "Gpt Nano Latest"
+        },
+        "gpt-image-latest": {
+          "name": "Gpt Image Latest"
+        },
+        "gemini-3-pro-preview": {
+          "name": "Gemini 3 Pro Preview"
+        },
+        "azure_ai/deepseek-v4-flash": {
+          "name": "Azure_ai/Deepseek V4 Flash"
+        },
+        "azure_ai/deepseek-v4-pro": {
+          "name": "Azure_ai/Deepseek V4 Pro"
+        },
+        "azure_ai/flux.2-pro": {
+          "name": "Azure_ai/Flux.2 Pro"
+        },
+        "text-embedding-3-large": {
+          "name": "Text Embedding 3 Large"
+        },
+        "text-embedding-3-small": {
+          "name": "Text Embedding 3 Small"
+        },
+        "gpt-image-1.5": {
+          "name": "Gpt Image 1.5"
+        },
+        "gpt-image-1": {
+          "name": "Gpt Image 1"
+        },
+        "gpt-image-2": {
+          "name": "Gpt Image 2"
+        },
+        "gpt-5.6-terra": {
+          "name": "Gpt 5.6 Terra"
+        },
+        "gpt-5.6-luna": {
+          "name": "Gpt 5.6 Luna"
+        },
+        "gpt-5.6-sol": {
+          "name": "Gpt 5.6 Sol"
+        },
+        "gpt-5.4": {
+          "name": "Gpt 5.4"
+        },
+        "gpt-5.5": {
+          "name": "Gpt 5.5"
+        },
+        "tts-1": {
+          "name": "Tts 1"
+        },
+        "tts-1-hd": {
+          "name": "Tts 1 Hd"
+        },
+        "azure/gpt-4o-transcribe-diarize": {
+          "name": "Azure/Gpt 4o Transcribe Diarize"
+        },
+        "azure/gpt-4o-mini-transcribe": {
+          "name": "Azure/Gpt 4o Mini Transcribe"
+        },
+        "gemini/gemini-2.5-flash-preview-tts": {
+          "name": "Gemini/Gemini 2.5 Flash Preview Tts"
+        },
+        "gemini-2.5-flash-lite": {
+          "name": "Gemini 2.5 Flash Lite"
+        },
+        "gemini/gemini-2.5-flash": {
+          "name": "Gemini/Gemini 2.5 Flash"
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro"
+        },
+        "gemini/gemini-2.0-flash-lite": {
+          "name": "Gemini/Gemini 2.0 Flash Lite"
+        },
+        "gemini/gemini-3.7-flash": {
+          "name": "Gemini/Gemini 3.7 Flash"
+        },
+        "gemini-3-pro-image-preview": {
+          "name": "Gemini 3 Pro Image Preview"
+        },
+        "eu.anthropic.claude-3-5-sonnet-20240620-v1:0": {
+          "name": "Eu.Anthropic.Claude 3 5 Sonnet 20240620 V1:0"
+        },
+        "gemini/gemini-2.0-flash": {
+          "name": "Gemini/Gemini 2.0 Flash"
+        },
+        "claude-3-5-haiku-20241022": {
+          "name": "Claude 3 5 Haiku 20241022"
+        },
+        "gpt-5.2-chat": {
+          "name": "Gpt 5.2 Chat"
+        },
+        "gemini/gemini-3-pro-image-preview": {
+          "name": "Gemini/Gemini 3 Pro Image Preview"
+        },
+        "eu.anthropic.claude-opus-4-7": {
+          "name": "Eu.Anthropic.Claude Opus 4 7"
+        },
+        "eu.anthropic.claude-sonnet-5": {
+          "name": "Eu.Anthropic.Claude Sonnet 5"
+        },
+        "gemini/imagen-4.0-fast-generate-001": {
+          "name": "Gemini/Imagen 4.0 Fast Generate 001"
+        },
+        "gemini/gemini-2.5-flash-image-preview": {
+          "name": "Gemini/Gemini 2.5 Flash Image Preview"
+        },
+        "eu.anthropic.claude-sonnet-4-6": {
+          "name": "Eu.Anthropic.Claude Sonnet 4 6"
+        },
+        "claude-sonnet-4-5-20250929": {
+          "name": "Claude Sonnet 4 5 20250929"
+        },
+        "claude-haiku-4-5-20251001": {
+          "name": "Claude Haiku 4 5 20251001"
+        },
+        "bedrock/global.cohere.embed-v4:0": {
+          "name": "Bedrock/Global.Cohere.Embed V4:0"
+        },
+        "eu.anthropic.claude-opus-4-6-v1": {
+          "name": "Eu.Anthropic.Claude Opus 4 6 V1"
+        },
+        "eu.anthropic.claude-opus-5": {
+          "name": "Eu.Anthropic.Claude Opus 5"
+        },
+        "eu.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+          "name": "Eu.Anthropic.Claude Sonnet 4 5 20250929 V1:0"
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview"
+        },
+        "bedrock/eu.anthropic.claude-opus-4-7": {
+          "name": "Bedrock/Eu.Anthropic.Claude Opus 4 7"
+        },
+        "vertex_ai/gemini-3.5-flash": {
+          "name": "Vertex_ai/Gemini 3.5 Flash"
+        },
+        "vertex_ai/gemini-3.1-flash-lite": {
+          "name": "Vertex_ai/Gemini 3.1 Flash Lite"
+        },
+        "bedrock/eu.anthropic.claude-opus-4-8": {
+          "name": "Bedrock/Eu.Anthropic.Claude Opus 4 8"
+        },
+        "gemini/gemini-3.6-flash": {
+          "name": "Gemini/Gemini 3.6 Flash"
+        },
+        "gemini/gemini-3.5-flash-lite": {
+          "name": "Gemini/Gemini 3.5 Flash Lite"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "joyia": {
+      "type": "local",
+      "command": [
+        "/Users/men0007a/.local/bin/joyia",
+        "mcp",
+        "server",
+        "--transport=stdio"
+      ],
+      "enabled": true
+    }
+  }
+}

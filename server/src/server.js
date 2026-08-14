@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { RoomManager, Room } = require('./rooms');
-const { ALL_TYPES, DIFFICULTIES, makeChallenge, checkAnswer } = require('./challenges');
+const { ALL_TYPES, CONVERSION_TYPES, DIFFICULTIES, makeChallenge, checkAnswer } = require('./challenges');
 
 const PORT = process.env.PORT || 3000;
 
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
     socket.join(code);
     roomCode = code;
 
-    if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES, difficulties: DIFFICULTIES });
+    if (ack) ack({ ok: true, you: socket.id, types: ALL_TYPES, conversionTypes: CONVERSION_TYPES, difficulties: DIFFICULTIES });
     r.broadcastState();
     manager.broadcastPublic();
 

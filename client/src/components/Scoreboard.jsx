@@ -4,6 +4,7 @@ const TYPE_LABELS = {
   fastType: 'fast type',
   getNet: 'network addr',
   broadcast: 'broadcast addr',
+  convert: 'number conversion',
   hexToDec: 'hex → dec',
   decToHex: 'dec → hex',
   binToDec: 'bin → dec',

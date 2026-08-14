@@ -15,7 +15,7 @@ Look like all those ridiculous hackers on TV. (Except Mr. Robot.)
 | fast type | type a hacker-flavoured phrase exactly |
 | network addr | calculate network address from `IP/CIDR` |
 | broadcast addr | calculate broadcast address from `IP/CIDR` |
-| hex → dec / dec → hex / bin → dec | quick number-base conversions |
+| number conversion | quick hex → dec, dec → hex, or bin → dec conversion; host chooses enabled directions |
 | bitwise xor | calculate decimal XOR |
 | port knock | dial and knock ports in sequence |
 | git re-parent | drag `HEAD` onto SHA-prefix target |
@@ -40,8 +40,8 @@ pickers. Team chat persists between lobby and game.
 - `disabledByDefault` — a `Set` of challenge `type` values that start
   **deselected** in the lobby. The host can still click them back on before
   starting; they're just off by default. Keys must match the server challenge
-  `type` strings (`fastType`, `getNet`, `broadcast`, `hexToDec`, `decToHex`,
-  `binToDec`, `xor`, `portKnock`, `gitReparent`, `phishHunter`,
+  `type` strings (`fastType`, `getNet`, `broadcast`, `convert`, `xor`,
+  `portKnock`, `gitReparent`, `phishHunter`,
   `packetSniffer`, `accessControl`, `hashHunt`). Remove a type to have it
   selected by default.
 

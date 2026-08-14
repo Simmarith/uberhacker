@@ -64,14 +64,15 @@ const DIFFICULTY_CONFIG = {
   hard: { words: 4, cidrs: [12, 18, 20, 26, 28, 30], maxNum: 4095, bits: 12, xorMax: 4095, knockPorts: 4, knockOffset: 900, reparent: { commits: 15, prefix: 12 }, choices: 5, hashPrefix: 10 },
 };
 
-function cfg(difficulty) {
-  return DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.normal;
+function cfg(difficulty, overrides = {}) {
+  const base = DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.normal;
+  return { ...base, ...overrides, reparent: { ...base.reparent, ...(overrides.reparent || {}) } };
 }
 
 const generators = {
   // Type the word(s) as fast as you can. Harder = more words.
-  fastType(difficulty) {
-    const count = cfg(difficulty).words;
+  fastType(difficulty, settings) {
+    const count = cfg(difficulty, settings).words;
     const words = Array.from({ length: count }, () => pick(WORD_POOL));
     const phrase = words.join(' ');
     return {
@@ -83,9 +84,9 @@ const generators = {
   },
 
   // Given IP / CIDR, find the network address. Harder = non-octet CIDRs.
-  getNet(difficulty) {
+  getNet(difficulty, settings) {
     const ip = randIp();
-    const cidr = pick(cfg(difficulty).cidrs);
+    const cidr = pick(cfg(difficulty, settings).cidrs);
     const mask = maskOctets(cidr);
     const network = ip.map((o, i) => o & mask[i]);
     return {
@@ -97,9 +98,9 @@ const generators = {
   },
 
   // Broadcast address for an IP / CIDR. Harder = non-octet CIDRs.
-  broadcast(difficulty) {
+  broadcast(difficulty, settings) {
     const ip = randIp();
-    const cidr = pick(cfg(difficulty).cidrs);
+    const cidr = pick(cfg(difficulty, settings).cidrs);
     const mask = maskOctets(cidr);
     const bcast = ip.map((o, i) => (o & mask[i]) | (~mask[i] & 255));
     return {
@@ -111,8 +112,8 @@ const generators = {
   },
 
   // Hex -> decimal. Harder = bigger numbers.
-  hexToDec(difficulty) {
-    const n = rand(cfg(difficulty).maxNum);
+  hexToDec(difficulty, settings) {
+    const n = rand(cfg(difficulty, settings).maxNum);
     return {
       type: 'hexToDec',
       prompt: `Convert hex  0x${n.toString(16).toUpperCase()}  to decimal:`,
@@ -122,8 +123,8 @@ const generators = {
   },
 
   // Decimal -> hex. Harder = bigger numbers.
-  decToHex(difficulty) {
-    const n = rand(cfg(difficulty).maxNum);
+  decToHex(difficulty, settings) {
+    const n = rand(cfg(difficulty, settings).maxNum);
     return {
       type: 'decToHex',
       prompt: `Convert decimal  ${n}  to hex (no 0x prefix):`,
@@ -133,8 +134,8 @@ const generators = {
   },
 
   // Binary -> decimal. Harder = wider binary.
-  binToDec(difficulty) {
-    const bits = cfg(difficulty).bits;
+  binToDec(difficulty, settings) {
+    const bits = cfg(difficulty, settings).bits;
     const n = rand(Math.pow(2, bits) - 1);
     return {
       type: 'binToDec',
@@ -147,8 +148,8 @@ const generators = {
   // Knock a sequence of ports on a safe-style rotary dial. Harder = more
   // ports in the sequence, and the dial starts further from each target.
   // Ports are kept in 1..9999.
-  portKnock(difficulty) {
-    const { knockPorts: count, knockOffset } = cfg(difficulty);
+  portKnock(difficulty, settings) {
+    const { knockPorts: count, knockOffset } = cfg(difficulty, settings);
     const ports = Array.from({ length: count }, () => 1 + rand(9998));
     return {
       type: 'portKnock',
@@ -161,8 +162,8 @@ const generators = {
   },
 
   // Bitwise XOR of two numbers (answer in decimal). Harder = bigger operands.
-  xor(difficulty) {
-    const max = cfg(difficulty).xorMax;
+  xor(difficulty, settings) {
+    const max = cfg(difficulty, settings).xorMax;
     const a = rand(max);
     const b = rand(max);
     return {
@@ -175,8 +176,8 @@ const generators = {
 
   // A tiny commit chain; move HEAD to the commit whose SHA starts with the
   // given prefix. Harder = more commits and a longer prefix to match.
-  gitReparent(difficulty) {
-    const { commits: n, prefix: plen } = cfg(difficulty).reparent;
+  gitReparent(difficulty, settings) {
+    const { commits: n, prefix: plen } = cfg(difficulty, settings).reparent;
     const SHA_LEN = 10;
     const commits = [];
     const seenPrefix = new Set();
@@ -201,7 +202,7 @@ const generators = {
   },
 
   // Spot the spoofed sender. Harder = more subtle typos in the domain.
-  phishHunter(difficulty) {
+  phishHunter(difficulty, settings) {
     const tier = difficulty === 'easy' ? 'easy' : difficulty === 'hard' ? 'hard' : 'normal';
     const set = pick(PHISH_SETS.filter((entry) => entry.tier === tier));
     const legitEmail = `${pick(FIRST_NAMES)}${set.legit}`;
@@ -223,8 +224,8 @@ const generators = {
   },
 
   // Inspect packet metadata and click the one leaking data to a hostile host.
-  packetSniffer(difficulty) {
-    const count = cfg(difficulty).choices;
+  packetSniffer(difficulty, settings) {
+    const count = cfg(difficulty, settings).choices;
     const normal = [
       ['10.0.0.12', '10.0.0.1', 'DNS', 'query api.internal'],
       ['10.0.0.44', '10.0.0.8', 'HTTPS', 'GET /status'],
@@ -270,8 +271,8 @@ const generators = {
   },
 
   // Pick the least-privilege access policy for a deployment robot.
-  accessControl(difficulty) {
-    const count = cfg(difficulty).choices;
+  accessControl(difficulty, settings) {
+    const count = cfg(difficulty, settings).choices;
     const scenarios = [
       {
         prompt: 'Grant deploy-bot only access needed to ship releases. Choose policy.',
@@ -342,9 +343,9 @@ const generators = {
   },
 
   // Match a signed artifact against its short SHA-256 fingerprint.
-  hashHunt(difficulty) {
-    const count = cfg(difficulty).choices;
-    const prefix = randSha(cfg(difficulty).hashPrefix);
+  hashHunt(difficulty, settings) {
+    const count = cfg(difficulty, settings).choices;
+    const prefix = randSha(cfg(difficulty, settings).hashPrefix);
     const correct = { id: 'verified', digest: `${prefix}${randSha(64 - prefix.length)}` };
     const options = [correct];
     while (options.length < count) {
@@ -410,7 +411,10 @@ function makeScopeTraps(correct, prompt) {
   ];
 }
 
-const ALL_TYPES = Object.keys(generators);
+// Base conversions are one game in the rotation. Its enabled directions are
+// configured separately, so three conversion variants do not triple its odds.
+const CONVERSION_TYPES = ['hexToDec', 'decToHex', 'binToDec'];
+const ALL_TYPES = [...Object.keys(generators).filter((type) => !CONVERSION_TYPES.includes(type)), 'convert'];
 
 // Normalize an answer for comparison: trim, lowercase, collapse spaces,
 // strip a leading 0x on hex-ish answers.
@@ -424,10 +428,13 @@ function normalize(value) {
 
 // Build a fresh challenge of a given type (or random if omitted) at the
 // given difficulty (defaults to 'normal').
-function makeChallenge(type, difficulty = 'normal') {
-  const t = type && generators[type] ? type : pick(ALL_TYPES);
+function makeChallenge(type, difficulty = 'normal', conversionTypes = CONVERSION_TYPES, settings = {}) {
+  const t = type && ALL_TYPES.includes(type) ? type : pick(ALL_TYPES);
   const d = DIFFICULTIES.includes(difficulty) ? difficulty : 'normal';
-  const c = generators[t](d);
+  const enabledConversions = conversionTypes.filter((conversion) => CONVERSION_TYPES.includes(conversion));
+  const c = t === 'convert'
+    ? generators[pick(enabledConversions.length ? enabledConversions : CONVERSION_TYPES)](d, settings)
+    : generators[t](d, settings);
   return {
     id: `${t}-${rand(1e9)}`,
     type: c.type,
@@ -442,4 +449,4 @@ function checkAnswer(challenge, value) {
   return normalize(challenge._answer) === normalize(value);
 }
 
-module.exports = { makeChallenge, checkAnswer, ALL_TYPES, DIFFICULTIES, normalize };
+module.exports = { makeChallenge, checkAnswer, ALL_TYPES, CONVERSION_TYPES, DIFFICULTIES, normalize };

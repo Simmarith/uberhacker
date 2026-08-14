@@ -1,4 +1,4 @@
-const { makeChallenge, checkAnswer, ALL_TYPES, DIFFICULTIES } = require('./challenges');
+const { makeChallenge, checkAnswer, ALL_TYPES, CONVERSION_TYPES, DIFFICULTIES } = require('./challenges');
 
 // Delay before a solved window is replaced by a fresh challenge, so players
 // can see who won before a new window pops up in its place.
@@ -12,7 +12,15 @@ class Room {
     this.hostId = null;
     this.state = 'lobby'; // lobby | playing | over
     this.public = false; // listed on the join page for anyone to find
-    this.config = { targetScore: 5, concurrent: 3, types: ALL_TYPES, difficulty: 'normal' };
+    this.config = {
+      targetScore: 5,
+      concurrent: 3,
+      types: ALL_TYPES,
+      conversionTypes: CONVERSION_TYPES,
+      difficultySettings: {},
+      gameDifficulties: {},
+      difficulty: 'normal',
+    };
     this.active = new Map(); // challengeId -> challenge (with _answer)
     this.timers = new Set(); // pending refill timeouts
     this.winner = null; // overall game winner
@@ -109,6 +117,9 @@ class Room {
       targetScore: clampInt(config.targetScore, 1, 50, this.config.targetScore),
       concurrent: clampInt(config.concurrent, 1, 6, this.config.concurrent),
       types: validTypes(config.types) || this.config.types,
+      conversionTypes: validConversionTypes(config.conversionTypes) || this.config.conversionTypes,
+      difficultySettings: validDifficultySettings(config.difficultySettings),
+      gameDifficulties: validGameDifficulties(config.gameDifficulties),
       difficulty: DIFFICULTIES.includes(config.difficulty)
         ? config.difficulty
         : this.config.difficulty,
@@ -126,7 +137,7 @@ class Room {
   spawnChallenge() {
     if (this.state !== 'playing') return;
     const type = this.config.types[Math.floor(Math.random() * this.config.types.length)];
-    const ch = makeChallenge(type, this.config.difficulty);
+    const ch = makeChallenge(type, this.config.gameDifficulties[type] || this.config.difficulty, this.config.conversionTypes, this.config.difficultySettings[type]);
     this.active.set(ch.id, ch);
     this.io.to(this.code).emit('challengeOpen', { ...Room.safe(ch), startedAt: Date.now() });
   }
@@ -203,6 +214,50 @@ function validTypes(types) {
   if (!Array.isArray(types)) return null;
   const filtered = types.filter((t) => ALL_TYPES.includes(t));
   return filtered.length ? filtered : null;
+}
+
+function validConversionTypes(types) {
+  if (!Array.isArray(types)) return null;
+  const filtered = types.filter((type) => CONVERSION_TYPES.includes(type));
+  return filtered.length ? filtered : null;
+}
+
+function validDifficultySettings(settings) {
+  const source = settings && typeof settings === 'object' ? settings : {};
+  return Object.fromEntries(
+    ALL_TYPES.map((type) => [type, validOneDifficultySettings(source[type])]).filter(([, value]) => Object.keys(value).length)
+  );
+}
+
+function validOneDifficultySettings(source) {
+  source = source && typeof source === 'object' ? source : {};
+  const int = (key, min, max) => {
+    const value = parseInt(source[key], 10);
+    return Number.isNaN(value) ? undefined : Math.max(min, Math.min(max, value));
+  };
+  const out = {};
+  for (const [key, min, max] of [
+    ['words', 1, 10], ['maxNum', 1, 65535], ['bits', 1, 16], ['xorMax', 1, 65535],
+    ['knockPorts', 1, 8], ['knockOffset', 0, 5000], ['choices', 2, 6], ['hashPrefix', 1, 32],
+  ]) {
+    const value = int(key, min, max);
+    if (value !== undefined) out[key] = value;
+  }
+  const commits = int('commits', 2, 30);
+  const prefix = int('prefix', 1, 10);
+  if (commits !== undefined || prefix !== undefined) out.reparent = { ...(commits !== undefined && { commits }), ...(prefix !== undefined && { prefix }) };
+  if (typeof source.cidrs === 'string') {
+    const cidrs = source.cidrs.split(',').map((value) => parseInt(value.trim(), 10)).filter((value) => Number.isInteger(value) && value >= 1 && value <= 30);
+    if (cidrs.length) out.cidrs = [...new Set(cidrs)];
+  }
+  return out;
+}
+
+function validGameDifficulties(difficulties) {
+  if (!difficulties || typeof difficulties !== 'object') return {};
+  return Object.fromEntries(
+    ALL_TYPES.filter((type) => DIFFICULTIES.includes(difficulties[type])).map((type) => [type, difficulties[type]])
+  );
 }
 
 class RoomManager {
