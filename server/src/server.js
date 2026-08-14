@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const compression = require('compression');
 const http = require('http');
 const { Server } = require('socket.io');
 const { RoomManager, Room } = require('./rooms');
@@ -8,6 +9,7 @@ const { ALL_TYPES, CONVERSION_TYPES, DIFFICULTIES, makeChallenge, checkAnswer } 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+app.use(compression()); // gzip/brotli static responses before they hit the wire
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 const manager = new RoomManager(io);
@@ -18,7 +20,20 @@ const demos = new Map();
 
 // Serve the built client (client/dist) if it exists.
 const clientDist = path.resolve(__dirname, '../../client/dist');
-app.use(express.static(clientDist));
+app.use(
+  express.static(clientDist, {
+    setHeaders(res, filePath) {
+      // Build assets are content-hashed, so cache them aggressively; a repeat
+      // visit re-downloads nothing. index.html stays no-cache so new deploys
+      // pick up fresh asset URLs immediately (it's revalidated via ETag).
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    },
+  })
+);
 
 function sanitizeName(name) {
   return String(name || '').trim().slice(0, 20) || 'anon';
@@ -32,8 +47,32 @@ function sanitizeCode(code) {
     .slice(0, 8);
 }
 
+// Per-socket token bucket so a buggy or hostile client can't flood the event
+// loop or the broadcast fanout. Refills `rate` tokens/sec up to a `burst`
+// capacity; `allow` returns false (and drops the event) while the bucket is
+// empty. Created per connection so it's garbage-collected on disconnect —
+// no cleanup map to leak.
+function makeRateLimiter({ rate, burst }) {
+  let tokens = burst;
+  let last = Date.now();
+  return {
+    allow(cost = 1) {
+      const now = Date.now();
+      tokens = Math.min(burst, tokens + ((now - last) / 1000) * rate);
+      last = now;
+      if (tokens < cost) return false;
+      tokens -= cost;
+      return true;
+    },
+  };
+}
+
 io.on('connection', (socket) => {
   let roomCode = null;
+
+  // Game traffic is human-paced; these caps only trip under automated floods.
+  // Heavier events (chat fans out to the whole room) cost more tokens.
+  const limiter = makeRateLimiter({ rate: 25, burst: 50 });
 
   // Seed the join-page lobby browser with the current public rooms.
   socket.emit('publicRooms', manager.publicList());
@@ -68,6 +107,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chat', ({ text } = {}) => {
+    if (!limiter.allow(5)) return; // drop flood silently, no ack to hang on
     const r = roomCode && manager.get(roomCode);
     if (r) r.addChat({ socketId: socket.id, text });
   });
@@ -89,6 +129,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('answer', ({ challengeId, value }, ack) => {
+    if (!limiter.allow()) return ack && ack({ result: 'throttled' });
     const r = roomCode && manager.get(roomCode);
     if (!r) return ack && ack({ result: 'closed' });
     const result = r.submitAnswer(socket.id, challengeId, value);
@@ -98,12 +139,14 @@ io.on('connection', (socket) => {
   // Lobby practice: generate an unscored demo challenge and hold its answer
   // server-side so checking reuses the real verification path.
   socket.on('demo', ({ type, difficulty } = {}, ack) => {
+    if (!limiter.allow(2)) return ack && ack({ ok: false, error: 'slow down.' });
     const ch = makeChallenge(type, difficulty);
     demos.set(socket.id, ch);
     if (ack) ack({ ok: true, challenge: Room.safe(ch) });
   });
 
   socket.on('demoAnswer', ({ value } = {}, ack) => {
+    if (!limiter.allow(2)) return ack && ack({ result: 'throttled' });
     const ch = demos.get(socket.id);
     if (!ch) return ack && ack({ result: 'closed' });
     if (ack) ack({ result: checkAnswer(ch, value) ? 'correct' : 'wrong' });

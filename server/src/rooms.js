@@ -264,6 +264,8 @@ class RoomManager {
   constructor(io) {
     this.io = io;
     this.rooms = new Map();
+    this._publicTimer = null; // trailing debounce timer for public-list broadcasts
+    this._publicKey = ''; // signature of the last public list we actually sent (empty at boot)
   }
 
   get(code) {
@@ -293,8 +295,34 @@ class RoomManager {
       .sort((a, b) => a.code.localeCompare(b.code));
   }
 
+  // Cheap signature of the current public-lobby list so no-op broadcasts (a
+  // player joining/leaving a *private* room, toggles that don't change the
+  // visible list) are skipped instead of re-sent to every connected socket.
+  _publicListKey() {
+    let key = '';
+    for (const [code, r] of this.rooms) {
+      if (r.public && r.state === 'lobby') key += `${code}:${r.players.size};`;
+    }
+    return key;
+  }
+
   // Push the public-room list to every connected client (joined or not).
+  // Trailing-edge debounce coalesces bursts — N players joining at once within
+  // the window becomes a single emit, not N — and _emitPublic skips the fanout
+  // entirely when the list didn't visibly change (players joining/leaving a
+  // private room, host toggles that don't alter the visible list).
   broadcastPublic() {
+    if (this._publicTimer) clearTimeout(this._publicTimer);
+    this._publicTimer = setTimeout(() => {
+      this._publicTimer = null;
+      this._emitPublic();
+    }, 100);
+  }
+
+  _emitPublic() {
+    const key = this._publicListKey();
+    if (key === this._publicKey) return;
+    this._publicKey = key;
     this.io.emit('publicRooms', this.publicList());
   }
 }
