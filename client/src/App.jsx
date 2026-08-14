@@ -18,6 +18,7 @@ export default function App() {
   const [windows, setWindows] = useState([]); // [{ id, challenge, pos, z, solved }]
   const [messages, setMessages] = useState([]); // chat log, survives lobby<->game
   const [publicRooms, setPublicRooms] = useState([]); // public lobbies for the join page
+  const [gamesSinceRestart, setGamesSinceRestart] = useState(0); // finished games this boot
 
   const zRef = useRef(10);
   const openCountRef = useRef(0);
@@ -74,6 +75,11 @@ export default function App() {
     const onChatMessage = (m) =>
       setMessages((ms) => (ms.some((x) => x.id === m.id) ? ms : [...ms, m]));
     const onPublicRooms = (list) => setPublicRooms(Array.isArray(list) ? list : []);
+    const onServerStats = (stats) => {
+      if (stats && Number.isFinite(stats.gamesSinceRestart)) {
+        setGamesSinceRestart(stats.gamesSinceRestart);
+      }
+    };
 
     socket.on('roomState', onRoomState);
     socket.on('challengeOpen', onChallengeOpen);
@@ -82,6 +88,7 @@ export default function App() {
     socket.on('chatHistory', onChatHistory);
     socket.on('chatMessage', onChatMessage);
     socket.on('publicRooms', onPublicRooms);
+    socket.on('serverStats', onServerStats);
     return () => {
       socket.off('roomState', onRoomState);
       socket.off('challengeOpen', onChallengeOpen);
@@ -90,6 +97,7 @@ export default function App() {
       socket.off('chatHistory', onChatHistory);
       socket.off('chatMessage', onChatMessage);
       socket.off('publicRooms', onPublicRooms);
+      socket.off('serverStats', onServerStats);
     };
   }, []);
 
@@ -112,7 +120,7 @@ export default function App() {
   }, []);
 
   if (!joined || !room) {
-    return <Join onJoin={join} publicRooms={publicRooms} />;
+    return <Join onJoin={join} publicRooms={publicRooms} gamesSinceRestart={gamesSinceRestart} />;
   }
 
   const isHost = room.hostId === you;

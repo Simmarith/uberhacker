@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Join({ onJoin, publicRooms = [] }) {
+export default function Join({ onJoin, publicRooms = [], gamesSinceRestart = 0 }) {
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
 
@@ -16,6 +16,11 @@ export default function Join({ onJoin, publicRooms = [] }) {
         uberhacker
       </div>
       <p className="tagline">// look like the hackers on TV. race your friends.</p>
+
+      <p className="hitcounter">
+        <span className="hitcounter-label">games since update/restart</span>
+        <span className="hitcounter-value">{gamesSinceRestart.toLocaleString()}</span>
+      </p>
 
       <form className="panel" onSubmit={submit}>
         <label>

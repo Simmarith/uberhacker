@@ -26,6 +26,7 @@ class Room {
     this.winner = null; // overall game winner
     this.chat = []; // recent chat log: { id, name, text, ts, system }
     this.chatSeq = 0; // monotonic message id counter
+    this.onGameEnded = null; // manager hook, fired when a game reaches "over"
   }
 
   // Append a chat message, cap the log, and broadcast it live. A system
@@ -193,6 +194,7 @@ class Room {
     this.winner = winner;
     this.broadcastState();
     this.io.to(this.code).emit('gameOver', winner);
+    if (this.onGameEnded) this.onGameEnded();
   }
 
   stop() {
@@ -261,9 +263,10 @@ function validGameDifficulties(difficulties) {
 }
 
 class RoomManager {
-  constructor(io) {
+  constructor(io, opts = {}) {
     this.io = io;
     this.rooms = new Map();
+    this._onGameEnded = opts.onGameEnded || null;
     this._publicTimer = null; // trailing debounce timer for public-list broadcasts
     this._publicKey = ''; // signature of the last public list we actually sent (empty at boot)
   }
@@ -276,6 +279,7 @@ class RoomManager {
     let room = this.rooms.get(code);
     if (!room) {
       room = new Room(code, this.io);
+      room.onGameEnded = this._onGameEnded;
       this.rooms.set(code, room);
     }
     return room;

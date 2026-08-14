@@ -12,7 +12,16 @@ const app = express();
 app.use(compression()); // gzip/brotli static responses before they hit the wire
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
-const manager = new RoomManager(io);
+
+// Finished games since this server process (re)started. Rawcount is shared
+// with every client; the manager bumps it when a game actually ends.
+let gamesSinceRestart = 0;
+const manager = new RoomManager(io, {
+  onGameEnded: () => {
+    gamesSinceRestart++;
+    io.emit('serverStats', { gamesSinceRestart });
+  },
+});
 
 // Per-socket lobby practice challenges. Lives outside any Room so it never
 // touches scoring or the game loop. socket.id -> challenge (with _answer).
@@ -76,6 +85,7 @@ io.on('connection', (socket) => {
 
   // Seed the join-page lobby browser with the current public rooms.
   socket.emit('publicRooms', manager.publicList());
+  socket.emit('serverStats', { gamesSinceRestart });
 
   socket.on('join', ({ room, username }, ack) => {
     const code = sanitizeCode(room);
